@@ -23,6 +23,7 @@ function Reveal({
   className?: string;
   delay?: number;
   direction?: "up" | "left" | "right";
+  stretch?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "0px" });

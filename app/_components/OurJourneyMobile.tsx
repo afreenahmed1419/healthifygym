@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 
-const STEPS = [
+type Step = { title: string; text: string; cta?: boolean };
+
+const STEPS: Step[] = [
   {
     title: "A Safe Space Is Born",
     text: "Healthify was founded with one purpose – to give women a comfortable, judgment-free environment to train confidently and focus on their goals.",
@@ -20,7 +22,7 @@ const STEPS = [
     text: "Join our community of women empowering women.",
     cta: true,
   },
-] as const;
+];
 
 export default function OurJourneyMobile() {
   return (
