@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Our Journey | Healthify</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0a0a0a;
+      color: #fff;
+      font-family: 'Barlow', sans-serif;
+      min-height: 200vh; /* room to scroll */
+    }
+
+    /* ── Section ──────────────────────────────────────────────────────── */
+    .journey-section {
+      position: relative;
+      padding: 100px 24px 140px;
+      background: #0a0a0a;
+      overflow: hidden;
+    }
+
+    /* Subtle hex grid background */
+    .journey-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='83' height='96'%3E%3Cpath d='M42 0L83 24v48L42 96 0 72V24z' fill='none' stroke='rgba(255,107,0,0.07)' stroke-width='1'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Header ───────────────────────────────────────────────────────── */
+    .journey-header {
+      text-align: center;
+      margin-bottom: 80px;
+      position: relative;
+      z-index: 2;
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .journey-header.visible { opacity: 1; transform: translateY(0); }
+
+    .journey-eyebrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      font-family: 'Barlow', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.35em;
+      color: #ff6b00;
+      margin-bottom: 18px;
+    }
+    .journey-eyebrow::before,
+    .journey-eyebrow::after {
+      content: '';
+      width: 40px;
+      height: 1px;
+      background: #ff6b00;
+      opacity: 0.45;
+    }
+
+    .journey-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3.5rem, 9vw, 8rem);
+      line-height: 0.88;
+      color: #f5f0eb;
+      letter-spacing: 0.03em;
+    }
+    .journey-title span { color: #ff6b00; text-shadow: 0 0 50px rgba(255,107,0,0.35); }
+
+    .journey-underline {
+      width: 70px;
+      height: 3px;
+      background: linear-gradient(to right, #ff6b00, transparent);
+      margin: 20px auto 0;
+      border-radius: 2px;
+    }
+
+    /* ── Track ────────────────────────────────────────────────────────── */
+    .journey-track {
+      position: relative;
+      max-width: 1000px;
+      margin: 0 auto;
+      z-index: 1;
+    }
+
+    /* ── SVG overlay ──────────────────────────────────────────────────── */
+    .journey-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    /* ── Stop rows ────────────────────────────────────────────────────── */
+    .stop {
+      display: grid;
+      grid-template-columns: 1fr 80px 1fr;
+      min-height: 300px;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* card placement */
+    .stop[data-side="left"]  .stop-card   { grid-column: 1; grid-row: 1; text-align: right; padding-right: 48px; }
+    .stop[data-side="left"]  .stop-middle { grid-column: 2; grid-row: 1; }
+    .stop[data-side="left"]  .stop-empty  { grid-column: 3; grid-row: 1; }
+
+    .stop[data-side="right"] .stop-empty  { grid-column: 1; grid-row: 1; }
+    .stop[data-side="right"] .stop-middle { grid-column: 2; grid-row: 1; }
+    .stop[data-side="right"] .stop-card   { grid-column: 3; grid-row: 1; text-align: left; padding-left: 48px; }
+
+    .stop-middle {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* invisible dot placeholder – JS reads its position */
+    .stop-marker {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: transparent;
+      position: relative;
+      z-index: 3;
+    }
+
+    /* ── Card content ─────────────────────────────────────────────────── */
+    .stop-card {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .stop-card.visible { opacity: 1; transform: translateY(0); }
+
+    .stop-num {
+      display: block;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(4rem, 7vw, 6.5rem);
+      color: rgba(255, 107, 0, 0.07);
+      line-height: 1;
+      margin-bottom: -12px;
+      letter-spacing: 0.02em;
+      user-select: none;
+    }
+
+    .stop-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+      color: #f5f0eb;
+      letter-spacing: 0.04em;
+      line-height: 1;
+      margin-bottom: 14px;
+    }
+
+    .stop-text {
+      font-family: 'Barlow', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 300;
+      color: #aaaaaa;
+      line-height: 1.85;
+      max-width: 340px;
+    }
+
+    /* right-side cards: text aligns left, num aligns right */
+    .stop[data-side="right"] .stop-num  { text-align: left; }
+    .stop[data-side="left"]  .stop-num  { text-align: right; }
+    .stop[data-side="left"]  .stop-text { margin-left: auto; }
+
+    /* ── Connector horizontal lines ───────────────────────────────────── */
+    .stop-connector {
+      position: absolute;
+      height: 1px;
+      top: 50%;
+      width: 44px;
+      pointer-events: none;
+    }
+    .stop[data-side="left"]  .stop-connector { right: 0; background: linear-gradient(to left, rgba(255,107,0,0.6), rgba(255,107,0,0.1)); }
+    .stop[data-side="right"] .stop-connector { left: 0; background: linear-gradient(to right, rgba(255,107,0,0.6), rgba(255,107,0,0.1)); }
+
+    /* ── Mobile ───────────────────────────────────────────────────────── */
+    @media (max-width: 700px) {
+      .stop {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        min-height: auto;
+        padding: 48px 0;
+        gap: 16px;
+      }
+      .stop-middle { order: -1; }
+      .stop-empty  { display: none; }
+      .stop-card   { text-align: center !important; padding: 0 !important; }
+      .stop-card .stop-text { margin: 0 auto; }
+      .stop-connector { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<section class="journey-section" id="journey">
+
+  <!-- ── Header ─────────────────────────────────────────────────── -->
+  <div class="journey-header" id="journeyHeader">
+    <p class="journey-eyebrow">THE HEALTHIFY STORY</p>
+    <h2 class="journey-title">THE HEALTHIFY<br><span>JOURNEY</span></h2>
+    <div class="journey-underline"></div>
+  </div>
+
+  <!-- ── Track ──────────────────────────────────────────────────── -->
+  <div class="journey-track" id="journeyTrack">
+
+    <!-- SVG is injected by JS -->
+    <svg class="journey-svg" id="journeySvg" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <!-- bg path (dim always-visible) -->
+      <path id="pathBg"  fill="none" stroke="rgba(255,107,0,0.1)" stroke-width="2" stroke-linecap="round"/>
+      <!-- animated path -->
+      <path id="pathAnim" fill="none" stroke="#ff6b00" stroke-width="2" stroke-linecap="round"
+            stroke-dasharray="1" stroke-dashoffset="1"/>
+      <!-- dots injected by JS -->
+    </svg>
+
+    <!-- ── Stop 01 · Left ──────────────────────────────────────── -->
+    <div class="stop" data-side="left">
+      <div class="stop-card">
+        <span class="stop-num">01</span>
+        <h3 class="stop-title">A Safe Space Is Born</h3>
+        <p class="stop-text">Healthify was founded with one purpose — to give women a comfortable, judgment-free environment to train confidently and focus on their goals.</p>
+      </div>
+      <div class="stop-middle">
+        <div class="stop-marker"></div>
+        <div class="stop-connector"></div>
+      </div>
+      <div class="stop-empty"></div>
+    </div>
+
+    <!-- ── Stop 02 · Right ─────────────────────────────────────── -->
+    <div class="stop" data-side="right">
+      <div class="stop-empty"></div>
+      <div class="stop-middle">
+        <div class="stop-marker"></div>
+        <div class="stop-connector"></div>
+      </div>
+      <div class="stop-card">
+        <span class="stop-num">02</span>
+        <h3 class="stop-title">Women Training Women</h3>
+        <p class="stop-text">We brought in female trainers who understand your body, your challenges, and your goals — making every session comfortable and effective.</p>
+      </div>
+    </div>
+
+    <!-- ── Stop 03 · Left ──────────────────────────────────────── -->
+    <div class="stop" data-side="left">
+      <div class="stop-card">
+        <span class="stop-num">03</span>
+        <h3 class="stop-title">Every Woman, Every Goal</h3>
+        <p class="stop-text">From fat loss and toning to strength gain and weight gain — we built personalized programs for women at every stage of life.</p>
+      </div>
+      <div class="stop-middle">
+        <div class="stop-marker"></div>
+        <div class="stop-connector"></div>
+      </div>
+      <div class="stop-empty"></div>
+    </div>
+
+    <!-- ── Stop 04 · Right ─────────────────────────────────────── -->
+    <div class="stop" data-side="right">
+      <div class="stop-empty"></div>
+      <div class="stop-middle">
+        <div class="stop-marker"></div>
+        <div class="stop-connector"></div>
+      </div>
+      <div class="stop-card">
+        <span class="stop-num">04</span>
+        <h3 class="stop-title">Beyond the Basics</h3>
+        <p class="stop-text">We go deeper — offering specialized support for postpartum recovery, PCOS/PCOD management, and thyroid-related fitness concerns.</p>
+      </div>
+    </div>
+
+    <!-- ── Stop 05 · Left ──────────────────────────────────────── -->
+    <div class="stop" data-side="left">
+      <div class="stop-card">
+        <span class="stop-num">05</span>
+        <h3 class="stop-title">Built to Last</h3>
+        <p class="stop-text">No crash diets. No quick fixes. Just sustainable transformations built on consistency, education, and a community that keeps you going.</p>
+      </div>
+      <div class="stop-middle">
+        <div class="stop-marker"></div>
+        <div class="stop-connector"></div>
+      </div>
+      <div class="stop-empty"></div>
+    </div>
+
+  </div><!-- /journey-track -->
+</section>
+
+<script>
+(function () {
+  const isMobile = () => window.innerWidth <= 700;
+
+  /* ── Build SVG path from marker positions ────────────────────── */
+  function buildPath() {
+    const track  = document.getElementById('journeyTrack');
+    const svg    = document.getElementById('journeySvg');
+    const pathBg = document.getElementById('pathBg');
+    const pathAn = document.getElementById('pathAnim');
+
+    // Remove old dots
+    svg.querySelectorAll('.journey-dot').forEach(el => el.remove());
+
+    const trackRect = track.getBoundingClientRect();
+    const trackTop  = track.offsetTop;
+    const H = track.scrollHeight;
+    const W = trackRect.width;
+
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.style.height = H + 'px';
+
+    const markers = Array.from(document.querySelectorAll('.stop-marker'));
+
+    if (isMobile()) {
+      // straight vertical line on mobile
+      const cx = W / 2;
+      const pathD = `M ${cx} 0 L ${cx} ${H}`;
+      pathBg.setAttribute('d', pathD);
+      pathAn.setAttribute('d', pathD);
+
+      markers.forEach(m => {
+        const r = m.getBoundingClientRect();
+        const cy = r.top - trackRect.top + r.height / 2;
+        addDot(svg, cx, cy);
+      });
+
+      animatePath(pathAn);
+      return;
+    }
+
+    // Desktop: collect marker centres in SVG coordinates
+    const pts = markers.map(m => {
+      const r = m.getBoundingClientRect();
+      return {
+        x: r.left - trackRect.left + r.width  / 2,
+        y: r.top  - trackRect.top  + r.height / 2,
+      };
+    });
+
+    const cx = W / 2;
+
+    // Winding path: start centre → each point → end centre
+    // Use Catmull-Rom–style control points for smooth S-curves
+    const allPts = [
+      { x: cx, y: 0 },
+      ...pts,
+      { x: cx, y: H },
+    ];
+
+    let d = `M ${allPts[0].x} ${allPts[0].y}`;
+    for (let i = 0; i < allPts.length - 1; i++) {
+      const p0 = allPts[Math.max(0, i - 1)];
+      const p1 = allPts[i];
+      const p2 = allPts[i + 1];
+      const p3 = allPts[Math.min(allPts.length - 1, i + 2)];
+      const cp1x = p1.x + (p2.x - p0.x) / 4;
+      const cp1y = p1.y + (p2.y - p0.y) / 4;
+      const cp2x = p2.x - (p3.x - p1.x) / 4;
+      const cp2y = p2.y - (p3.y - p1.y) / 4;
+      d += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+    }
+
+    pathBg.setAttribute('d', d);
+    pathAn.setAttribute('d', d);
+
+    // Add glowing dots at each stop
+    pts.forEach(pt => addDot(svg, pt.x, pt.y));
+
+    animatePath(pathAn);
+  }
+
+  function addDot(svg, cx, cy) {
+    // Outer glow ring
+    const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    ring.setAttribute('cx', cx);
+    ring.setAttribute('cy', cy);
+    ring.setAttribute('r', 12);
+    ring.setAttribute('fill', 'rgba(255,107,0,0.1)');
+    ring.setAttribute('stroke', 'rgba(255,107,0,0.3)');
+    ring.setAttribute('stroke-width', '1');
+    ring.classList.add('journey-dot');
+    svg.appendChild(ring);
+
+    // Solid centre dot
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    dot.setAttribute('cx', cx);
+    dot.setAttribute('cy', cy);
+    dot.setAttribute('r', 6);
+    dot.setAttribute('fill', '#ff6b00');
+    dot.setAttribute('filter', 'url(#glow)');
+    dot.classList.add('journey-dot');
+    svg.appendChild(dot);
+  }
+
+  /* ── Stroke-dashoffset animation ─────────────────────────────── */
+  function animatePath(path) {
+    const len = path.getTotalLength();
+    path.style.strokeDasharray  = len;
+    path.style.strokeDashoffset = len;
+    path.style.transition = 'none';
+
+    // Trigger after paint
+    requestAnimationFrame(() => {
+      path.style.transition = 'stroke-dashoffset 2.4s cubic-bezier(0.4,0,0.2,1)';
+      path.style.strokeDashoffset = 0;
+    });
+  }
+
+  /* ── IntersectionObserver for fade-ins ───────────────────────── */
+  function setupObservers() {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.stop-card').forEach((card, i) => {
+      card.style.transitionDelay = (i * 0.12) + 's';
+      io.observe(card);
+    });
+
+    // Header
+    const headerIo = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.3 });
+    headerIo.observe(document.getElementById('journeyHeader'));
+
+    // Section entering viewport triggers path draw
+    const sectionIo = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) buildPath(); });
+    }, { threshold: 0.05, rootMargin: '0px 0px -10% 0px' });
+    sectionIo.observe(document.getElementById('journey'));
+  }
+
+  /* ── Init ─────────────────────────────────────────────────────── */
+  window.addEventListener('load', () => {
+    buildPath();
+    setupObservers();
+  });
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(buildPath, 120);
+  });
+})();
+</script>
+
+</body>
+</html>

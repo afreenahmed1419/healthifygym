@@ -1,0 +1,85 @@
+.gm-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.gm-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /* Match the original GridMotion rotation; translate centres the block */
+  transform: translate(-50%, -50%) rotate(-15deg);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  /* Extra vertical padding so rows cover viewport corners after rotation */
+  padding: 8rem 0;
+}
+
+.gm-row {
+  display: flex;
+  gap: 1rem;
+  /* Rows are wider than the viewport — let them be their natural size */
+  width: max-content;
+  will-change: transform;
+}
+
+/* Items sized exactly like the original 3×5 grid: 150vw ÷ 5 columns */
+.gm-item {
+  flex: 0 0 calc((150vw - 4rem) / 5);
+  aspect-ratio: 4 / 3;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255, 107, 0, 0.08);
+}
+
+.gm-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  /* Boost brightness so images punch through the overlay */
+  filter: brightness(1.25) contrast(1.05) saturate(1.1);
+}
+
+.gm-placeholder {
+  width: 100%;
+  height: 100%;
+}
+
+/* Much lighter overlay so images are clearly visible behind the text */
+.gm-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(0, 0, 0, 0.05) 0%,
+    rgba(0, 0, 0, 0.45) 55%,
+    rgba(0, 0, 0, 0.82) 100%
+  );
+}
+
+@media (max-width: 767px) {
+  .gm-wrapper {
+    padding: 6rem 0;
+    gap: 0.5rem;
+  }
+  /* Taller portrait items so the rows fill the full viewport height */
+  .gm-item {
+    flex: 0 0 calc((160vw - 3rem) / 4);
+    aspect-ratio: 2 / 3;
+  }
+  /* Lighter centre cutout so images show through behind the card */
+  .gm-overlay {
+    background: radial-gradient(
+      ellipse at 50% 50%,
+      rgba(0, 0, 0, 0.0) 0%,
+      rgba(0, 0, 0, 0.30) 50%,
+      rgba(0, 0, 0, 0.75) 100%
+    );
+  }
+}

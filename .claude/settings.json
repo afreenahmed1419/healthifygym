@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Select-Object -First 5)",
+      "Bash(powershell -Command \"Get-ChildItem 'C:\\\\Users\\\\Ahmed\\\\Downloads\\\\New folder' | Select-Object Name, Extension\")",
+      "PowerShell(Copy-Item \"C:\\\\Users\\\\Ahmed\\\\OneDrive\\\\Pictures\\\\Screenshots\\\\Screenshot 2026-05-21 134454.png\" \"C:\\\\Users\\\\Ahmed\\\\healthify\\\\public\\\\images\\\\sandhya.png\" -Force)",
+      "PowerShell(Copy-Item \"C:\\\\Users\\\\Ahmed\\\\OneDrive\\\\Pictures\\\\Screenshots\\\\Screenshot 2026-05-21 134516.png\" \"C:\\\\Users\\\\Ahmed\\\\healthify\\\\public\\\\images\\\\ankita.png\" -Force)",
+      "Bash(npm run *)",
+      "Bash(echo \"Frontend started with PID $!\")",
+      "Bash(npx tsc --noEmit *)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\Ahmed\\OneDrive\\Pictures\\Screenshots"
+    ]
+  }
+}

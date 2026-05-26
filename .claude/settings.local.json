@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(node -e \"require\\('zod'\\); console.log\\('zod ok'\\)\")",
+      "Bash(node -e \"require\\('axios'\\); console.log\\('axios ok'\\)\")",
+      "PowerShell(Copy-Item \"C:\\\\Users\\\\Ahmed\\\\Downloads\\\\healthify-files\\\\healthify files\\\\yoga image healthify.png\" \"C:\\\\Users\\\\Ahmed\\\\healthify\\\\public\\\\images\\\\services\\\\yoga-2.png\" -Force)",
+      "PowerShell(Copy-Item \"C:\\\\Users\\\\Ahmed\\\\Downloads\\\\healthify-files\\\\healthify files\\\\zumba image healthify.png\" \"C:\\\\Users\\\\Ahmed\\\\healthify\\\\public\\\\images\\\\services\\\\zumba-aerobics-2.png\" -Force)",
+      "Read(//c/Users/Ahmed/Downloads/**)",
+      "Bash(Sort-Object LastWriteTime -Descending)",
+      "Bash(Select-Object -First 20)",
+      "Bash(Format-Table Name, LastWriteTime)",
+      "Bash(npm install *)",
+      "Bash(Start-Sleep -Seconds 5)",
+      "Bash(Get-Content \"C:\\\\Users\\\\Ahmed\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-Ahmed-healthify\\\\eb021749-c364-4c33-a3d7-ed3246a7e122\\\\tasks\\\\btht33vr5.output\" -Tail 10)",
+      "Bash(Write-Host \"---FRONTEND---\")",
+      "Bash(Get-Content \"C:\\\\Users\\\\Ahmed\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-Ahmed-healthify\\\\eb021749-c364-4c33-a3d7-ed3246a7e122\\\\tasks\\\\bylkgdmaz.output\" -Tail 10)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Ahmed\\\\healthify\" -Recurse -Force | Where-Object { $_.PSIsContainer -eq $false } | Select-Object FullName | ForEach-Object { $_.FullName.Replace\\(\"C:\\\\Users\\\\Ahmed\\\\healthify\\\\\", \"\"\\) } | Sort-Object)"
+    ]
+  }
+}
