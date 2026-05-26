@@ -135,28 +135,23 @@ function ContactForm() {
     return e;
   };
 
-  const handleSubmit = async (ev: React.FormEvent) => {
+  const handleSubmit = (ev: React.FormEvent) => {
     ev.preventDefault();
     const e = validate();
     setErrors(e);
     if (Object.keys(e).length > 0) return;
 
-    setLoading(true);
-    setSubmitError("");
-    try {
-      await apiClient.post("/api/contact", {
-        name: name.trim(),
-        whatsappNumber: whatsapp.trim(),
-        email: email.trim() || undefined,
-        message: message.trim() || undefined,
-        preferredBranch: branch || undefined,
-      });
-      setSuccess(true);
-    } catch (err: unknown) {
-      setSubmitError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    const lines = [
+      `Hi! I'm ${name.trim()}.`,
+      whatsapp.trim() ? `My WhatsApp: ${whatsapp.trim()}` : "",
+      email.trim() ? `Email: ${email.trim()}` : "",
+      branch ? `Preferred Branch: ${branch}` : "",
+      message.trim() ? `\nMessage: ${message.trim()}` : "",
+    ].filter(Boolean).join("\n");
+
+    const url = `https://wa.me/917063164720?text=${encodeURIComponent(lines)}`;
+    window.open(url, "_blank");
+    setSuccess(true);
   };
 
   if (success) {
