@@ -3,30 +3,33 @@ import { generateOTP, hashOTP, otpExpiry, formatIndianPhone, validatePhoneNumber
 import { getAdminClient } from "@/lib/supabase";
 import type { SendOTPResponse } from "@/lib/types";
 
-async function sendWhatsAppOTP(phone: string, otp: string): Promise<{ sent: boolean; error?: string }> {
-  const sid = process.env.TWILIO_ACCOUNT_SID;
-  const token = process.env.TWILIO_AUTH_TOKEN;
-  const from = process.env.TWILIO_WHATSAPP_FROM;
+async function sendOTPviaSMS(phone: string, otp: string): Promise<{ sent: boolean; error?: string }> {
+  const apiKey = process.env.FAST2SMS_API_KEY;
 
-  // Always log to server console so devs can test without WhatsApp
+  // Always log so devs can test without an API key
   console.log(`[OTP] ${phone} → ${otp}`);
 
-  if (!sid || !token || !from) {
-    return { sent: false, error: "Twilio not configured — OTP logged to server console." };
+  if (!apiKey) {
+    return { sent: false, error: "FAST2SMS_API_KEY not configured — OTP logged to server console." };
   }
 
+  // Fast2SMS expects a 10-digit number (no +91 prefix)
+  const number = phone.replace(/^\+91/, "");
+
   try {
-    const twilio = (await import("twilio")).default;
-    const client = twilio(sid, token);
-    await client.messages.create({
-      from: `whatsapp:${from}`,
-      to: `whatsapp:${phone}`,
-      body: `Your Healthify OTP is: *${otp}*\n\nValid for 5 minutes. Do not share this with anyone.\n\n— Healthify Women's Fitness Club`,
+    const res = await fetch("https://www.fast2sms.com/dev/bulkV2", {
+      method: "POST",
+      headers: { authorization: apiKey, "Content-Type": "application/json" },
+      body: JSON.stringify({ route: "otp", variables_values: otp, numbers: number, flash: 0 }),
     });
-    return { sent: true };
+    const data = await res.json() as { return?: boolean; message?: string | string[] };
+    if (data.return === true) return { sent: true };
+    const errMsg = Array.isArray(data.message) ? data.message.join(", ") : String(data.message ?? "Unknown error");
+    console.error(`[OTP] Fast2SMS error for ${phone}:`, errMsg);
+    return { sent: false, error: errMsg };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error(`[OTP] Twilio delivery failed for ${phone}:`, msg);
+    console.error(`[OTP] Fast2SMS request failed for ${phone}:`, msg);
     return { sent: false, error: msg };
   }
 }
@@ -79,14 +82,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Send via WhatsApp (Twilio); OTP is always logged to server console
-    const { sent, error: twilioError } = await sendWhatsAppOTP(phone, otp);
+    // Send via Fast2SMS; OTP is always logged to server console
+    const { sent, error: smsError } = await sendOTPviaSMS(phone, otp);
 
     return NextResponse.json<SendOTPResponse>({
       success: true,
       message: sent
-        ? `OTP sent to ${phone} on WhatsApp.`
-        : `OTP generated${twilioError ? " (WhatsApp unavailable — check server console)" : ""}.`,
+        ? `OTP sent to ${phone} via SMS.`
+        : `OTP generated${smsError ? " (SMS unavailable — check server console)" : ""}.`,
       expiresAt,
     });
   } catch (err) {

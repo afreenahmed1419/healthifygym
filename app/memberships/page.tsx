@@ -8,22 +8,34 @@ import HealthifyCard from "../_components/HealthifyCard";
 // ─── Hex grid SVG background ──────────────────────────────────────────────────
 
 function HexBackground() {
+  const R = 52;
+  const drawR = R - 5;
+  const hx = R * Math.sqrt(3);
+  const vy = R * 1.5;
+
+  const pts = (cx: number, cy: number) =>
+    Array.from({ length: 6 }, (_, i) => {
+      const a = (Math.PI / 3) * i - Math.PI / 6;
+      return `${(cx + drawR * Math.cos(a)).toFixed(1)},${(cy + drawR * Math.sin(a)).toFixed(1)}`;
+    }).join(" ");
+
+  const hexes: string[] = [];
+  for (let row = -1; row <= 11; row++) {
+    for (let col = -1; col <= 20; col++) {
+      const cx = col * hx + (row % 2 !== 0 ? hx / 2 : 0);
+      const cy = row * vy;
+      hexes.push(pts(cx, cy));
+    }
+  }
+
   return (
     <svg
       style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0 }}
       xmlns="http://www.w3.org/2000/svg"
     >
-      <defs>
-        <pattern id="mem-hex" width="83" height="144" patternUnits="userSpaceOnUse">
-          <path
-            d="M42,0 L83,24 L83,72 L42,96 L0,72 L0,24 Z M42,96 L42,144"
-            fill="none"
-            stroke="rgba(255,130,0,0.15)"
-            strokeWidth="1"
-          />
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#mem-hex)" />
+      {hexes.map((p, i) => (
+        <polygon key={i} points={p} fill="none" stroke="rgba(255,130,0,0.12)" strokeWidth="1.2" />
+      ))}
     </svg>
   );
 }
@@ -211,8 +223,8 @@ function SectionLabel({ title, subtitle, subtitleOrange }: { title: string; subt
 function PricingTable({ rows }: { rows: typeof ESSENTIAL_ROWS }) {
   return (
     <div>
-      {/* Header */}
-      <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", background: "rgba(255,130,0,0.1)", border: "1px solid rgba(255,130,0,0.2)", padding: "14px 24px", marginBottom: "2px", borderRadius: "8px 8px 0 0", alignItems: "center" }}>
+      {/* Header — hidden on mobile */}
+      <div className="mem-table-header" style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", background: "rgba(255,130,0,0.1)", border: "1px solid rgba(255,130,0,0.2)", padding: "14px 24px", marginBottom: "2px", borderRadius: "8px 8px 0 0", alignItems: "center" }}>
         <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.18em", color: "#FF8200" }}>SUBSCRIPTION TYPE</span>
         <div style={{ textAlign: "center" }}>
           <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.18em", color: "#FF8200" }}>MEMBER</span>
@@ -227,9 +239,10 @@ function PricingTable({ rows }: { rows: typeof ESSENTIAL_ROWS }) {
       {rows.map((row, i) => (
         <div
           key={row.type}
+          className="mem-table-row"
           style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", padding: "18px 24px", borderBottom: i < rows.length - 1 ? "1px solid rgba(255,130,0,0.07)" : "none", background: i % 2 === 0 ? "rgba(255,130,0,0.03)" : "rgba(255,255,255,0.01)", borderRadius: i === rows.length - 1 ? "0 0 8px 8px" : 0, alignItems: "center" }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div className="mem-col-type" style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
             <span style={{ fontFamily: "var(--font-display)", fontSize: "1rem", fontWeight: 500, color: "rgba(245,240,235,0.75)", letterSpacing: "0.04em" }}>{row.type}</span>
             {row.pt && (
               <span style={{ fontFamily: "var(--font-display)", fontSize: "8px", fontWeight: 700, letterSpacing: "0.12em", color: "#FF8200", background: "rgba(255,130,0,0.12)", border: "1px solid rgba(255,130,0,0.25)", padding: "3px 8px", borderRadius: "4px", whiteSpace: "nowrap" as const }}>
@@ -237,12 +250,15 @@ function PricingTable({ rows }: { rows: typeof ESSENTIAL_ROWS }) {
               </span>
             )}
           </div>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, color: "#FF8200", textAlign: "center", letterSpacing: "0.02em" }}>
-            {inr(row.member)}
-          </span>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: "1rem", fontWeight: 500, color: "rgba(245,240,235,0.4)", textAlign: "right", letterSpacing: "0.02em" }}>
-            {row.nonMember != null ? inr(row.nonMember) : "—"}
-          </span>
+          {/* display:contents makes children behave as direct grid items on desktop */}
+          <div className="mem-prices-group" style={{ display: "contents" }}>
+            <span className="mem-col-member" style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, color: "#FF8200", textAlign: "center", letterSpacing: "0.02em" }}>
+              {inr(row.member)}
+            </span>
+            <span className="mem-col-nonmember" style={{ fontFamily: "var(--font-display)", fontSize: "1rem", fontWeight: 500, color: "rgba(245,240,235,0.4)", textAlign: "right", letterSpacing: "0.02em" }}>
+              {row.nonMember != null ? inr(row.nonMember) : "—"}
+            </span>
+          </div>
         </div>
       ))}
     </div>
@@ -254,7 +270,7 @@ function PricingTable({ rows }: { rows: typeof ESSENTIAL_ROWS }) {
 function YogaTable({ rows }: { rows: typeof YOGA_ROWS }) {
   return (
     <div>
-      <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", background: "rgba(255,130,0,0.1)", border: "1px solid rgba(255,130,0,0.2)", padding: "14px 24px", marginBottom: "2px", borderRadius: "8px 8px 0 0", alignItems: "center" }}>
+      <div className="mem-table-header" style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", background: "rgba(255,130,0,0.1)", border: "1px solid rgba(255,130,0,0.2)", padding: "14px 24px", marginBottom: "2px", borderRadius: "8px 8px 0 0", alignItems: "center" }}>
         <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.18em", color: "#FF8200" }}>SUBSCRIPTION TYPE</span>
         <div style={{ textAlign: "center" }}>
           <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.18em", color: "#FF8200" }}>MEMBER</span>
@@ -268,11 +284,14 @@ function YogaTable({ rows }: { rows: typeof YOGA_ROWS }) {
       {rows.map((row, i) => (
         <div
           key={row.type}
+          className="mem-table-row"
           style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", padding: "18px 24px", borderBottom: i < rows.length - 1 ? "1px solid rgba(255,130,0,0.07)" : "none", background: i % 2 === 0 ? "rgba(255,130,0,0.03)" : "rgba(255,255,255,0.01)", borderRadius: i === rows.length - 1 ? "0 0 8px 8px" : 0, alignItems: "center" }}
         >
-          <span style={{ fontFamily: "var(--font-display)", fontSize: "1rem", fontWeight: 500, color: "rgba(245,240,235,0.75)", letterSpacing: "0.04em" }}>{row.type}</span>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, color: "#FF8200", textAlign: "center", letterSpacing: "0.02em" }}>{inr(row.member)}</span>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: "1rem", fontWeight: 500, color: "rgba(245,240,235,0.4)", textAlign: "right", letterSpacing: "0.02em" }}>{inr(row.nonMember)}</span>
+          <span className="mem-col-type" style={{ fontFamily: "var(--font-display)", fontSize: "1rem", fontWeight: 500, color: "rgba(245,240,235,0.75)", letterSpacing: "0.04em" }}>{row.type}</span>
+          <div className="mem-prices-group" style={{ display: "contents" }}>
+            <span className="mem-col-member" style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, color: "#FF8200", textAlign: "center", letterSpacing: "0.02em" }}>{inr(row.member)}</span>
+            <span className="mem-col-nonmember" style={{ fontFamily: "var(--font-display)", fontSize: "1rem", fontWeight: 500, color: "rgba(245,240,235,0.4)", textAlign: "right", letterSpacing: "0.02em" }}>{inr(row.nonMember)}</span>
+          </div>
         </div>
       ))}
     </div>
@@ -284,7 +303,7 @@ function YogaTable({ rows }: { rows: typeof YOGA_ROWS }) {
 function ComboTable({ rows }: { rows: typeof COMBO_ROWS }) {
   return (
     <div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1.4fr", background: "rgba(255,130,0,0.1)", border: "1px solid rgba(255,130,0,0.2)", padding: "14px 24px", marginBottom: "2px", borderRadius: "8px 8px 0 0", alignItems: "center" }}>
+      <div className="mem-table-header" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1.4fr", background: "rgba(255,130,0,0.1)", border: "1px solid rgba(255,130,0,0.2)", padding: "14px 24px", marginBottom: "2px", borderRadius: "8px 8px 0 0", alignItems: "center" }}>
         <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.18em", color: "#FF8200" }}>SUBSCRIPTION</span>
         <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.18em", color: "#FF8200", textAlign: "center" }}>PRICE</span>
         <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.18em", color: "#FF8200", textAlign: "right" }}>BENEFITS</span>
@@ -292,11 +311,12 @@ function ComboTable({ rows }: { rows: typeof COMBO_ROWS }) {
       {rows.map((row, i) => (
         <div
           key={row.type}
+          className="mem-combo-row"
           style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1.4fr", padding: "18px 24px", borderBottom: i < rows.length - 1 ? "1px solid rgba(255,130,0,0.07)" : "none", background: i % 2 === 0 ? "rgba(255,130,0,0.03)" : "rgba(255,255,255,0.01)", borderRadius: i === rows.length - 1 ? "0 0 8px 8px" : 0, alignItems: "center" }}
         >
-          <span style={{ fontFamily: "var(--font-display)", fontSize: "1rem", fontWeight: 500, color: "rgba(245,240,235,0.75)", letterSpacing: "0.04em" }}>{row.type}</span>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, color: "#F5F0EB", textAlign: "center", letterSpacing: "0.02em" }}>{inr(row.price)}</span>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: "0.88rem", fontWeight: 600, color: "#FF8200", textAlign: "right", letterSpacing: "0.02em" }}>{row.benefit}</span>
+          <span className="mem-col-type" style={{ fontFamily: "var(--font-display)", fontSize: "1rem", fontWeight: 500, color: "rgba(245,240,235,0.75)", letterSpacing: "0.04em" }}>{row.type}</span>
+          <span className="mem-combo-price" style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, color: "#F5F0EB", textAlign: "center", letterSpacing: "0.02em" }}>{inr(row.price)}</span>
+          <span className="mem-combo-benefit" style={{ fontFamily: "var(--font-display)", fontSize: "0.88rem", fontWeight: 600, color: "#FF8200", textAlign: "right", letterSpacing: "0.02em" }}>{row.benefit}</span>
         </div>
       ))}
     </div>

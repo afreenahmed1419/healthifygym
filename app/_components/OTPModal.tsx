@@ -313,13 +313,13 @@ export default function OTPModal({ isOpen, onClose, onSuccess }: OTPModalProps) 
                         <span style={{ color: "#FF8200" }}>HEALTHIFY</span>
                       </h2>
                       <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", fontWeight: 300, color: "rgba(245,240,235,0.38)", marginBottom: 32, lineHeight: 1.5 }}>
-                        Enter your WhatsApp number to continue
+                        Enter your mobile number to continue
                       </p>
 
                       {/* Phone input */}
                       <div style={{ marginBottom: 20 }}>
                         <label style={{ fontFamily: "var(--font-display)", fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.22em", color: "rgba(245,240,235,0.35)", textTransform: "uppercase", display: "block", marginBottom: 10 }}>
-                          WhatsApp Number
+                          Mobile Number
                         </label>
                         <div
                           style={{
@@ -378,10 +378,10 @@ export default function OTPModal({ isOpen, onClose, onSuccess }: OTPModalProps) 
                       {/* Footer */}
                       <div style={{ marginTop: 28, paddingTop: 20, borderTop: "1px solid rgba(255,130,0,0.08)", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
                         <p style={{ fontFamily: "var(--font-body)", fontSize: "0.72rem", color: "rgba(245,240,235,0.25)", letterSpacing: "0.02em" }}>
-                          We&apos;ll send a 6-digit OTP on WhatsApp
+                          We&apos;ll send a 6-digit OTP via SMS
                         </p>
                         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-                          {["Secure", "Fast", "WhatsApp Verified"].map((label) => (
+                          {["Secure", "Fast", "SMS Verified"].map((label) => (
                             <span key={label} style={{ display: "flex", alignItems: "center", gap: 5, fontFamily: "var(--font-display)", fontSize: "0.52rem", fontWeight: 700, letterSpacing: "0.14em", color: "rgba(245,240,235,0.25)" }}>
                               <span style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(255,130,0,0.5)", display: "inline-block", flexShrink: 0 }} />
                               {label}

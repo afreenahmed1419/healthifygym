@@ -5,6 +5,42 @@ import { getAdminClient } from "@/lib/supabase";
 import type { Database } from "@/lib/database.types";
 import type { VerifyOTPResponse } from "@/lib/types";
 
+async function notifyOwnerOnSignup(userPhone: string): Promise<void> {
+  const apiKey = process.env.FAST2SMS_API_KEY;
+  const ownerNumber = process.env.OWNER_WHATSAPP_NUMBER;
+
+  if (!apiKey || !ownerNumber) {
+    console.log(`[Owner Notify] New signup: ${userPhone}`);
+    return;
+  }
+
+  // Build owner's number in format Fast2SMS expects: 91XXXXXXXXXX (no +)
+  const ownerDigits = ownerNumber.replace(/^\+/, "").replace(/\D/g, "");
+  const ist = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata", hour12: true });
+
+  const message =
+    `🎉 NEW MEMBER SIGNUP\n\n` +
+    `Phone: ${userPhone}\n` +
+    `Time: ${ist}\n\n` +
+    `— Healthify Women's Fitness Club`;
+
+  try {
+    const res = await fetch("https://www.fast2sms.com/dev/wa-group", {
+      method: "POST",
+      headers: { authorization: apiKey, "Content-Type": "application/json" },
+      body: JSON.stringify({ message, numbers: ownerDigits }),
+    });
+    const data = await res.json() as { return?: boolean; message?: unknown };
+    if (data.return) {
+      console.log("[Owner Notify] WhatsApp sent to owner");
+    } else {
+      console.error("[Owner Notify] WhatsApp failed:", JSON.stringify(data));
+    }
+  } catch (err) {
+    console.error("[Owner Notify] Failed:", err);
+  }
+}
+
 type UserRow = Database["public"]["Tables"]["users"]["Row"];
 
 export async function POST(req: NextRequest) {
@@ -100,6 +136,8 @@ export async function POST(req: NextRequest) {
       }
 
       finalUser = newUser;
+      // Fire-and-forget: notify owner on WhatsApp about new signup
+      notifyOwnerOnSignup(phone).catch(() => {});
     } else {
       if (!existingUser.otp_verified) {
         await db
