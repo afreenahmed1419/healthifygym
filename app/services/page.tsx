@@ -334,34 +334,22 @@ function ServicesParticles() {
 // ─── Hex background ───────────────────────────────────────────────────────────
 
 function HexBg() {
-  const R = 52;
-  const drawR = R - 5; // gap between hexes prevents cube optical illusion
-  const hx = R * Math.sqrt(3);
-  const vy = R * 1.5;
-
-  const pts = (cx: number, cy: number) =>
-    Array.from({ length: 6 }, (_, i) => {
-      const a = (Math.PI / 3) * i - Math.PI / 6;
-      return `${(cx + drawR * Math.cos(a)).toFixed(1)},${(cy + drawR * Math.sin(a)).toFixed(1)}`;
-    }).join(" ");
-
-  const hexes: string[] = [];
-  for (let row = -1; row <= 11; row++) {
-    for (let col = -1; col <= 20; col++) {
-      const cx = col * hx + (row % 2 !== 0 ? hx / 2 : 0);
-      const cy = row * vy;
-      hexes.push(pts(cx, cy));
-    }
-  }
-
   return (
     <svg
-      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0 }}
+      style={{
+        position: "absolute", inset: 0, width: "100%", height: "100%",
+        pointerEvents: "none", zIndex: 0,
+        maskImage: "linear-gradient(to bottom, transparent, black 72px, black calc(100% - 72px), transparent)",
+        WebkitMaskImage: "linear-gradient(to bottom, transparent, black 72px, black calc(100% - 72px), transparent)",
+      }}
       xmlns="http://www.w3.org/2000/svg"
     >
-      {hexes.map((p, i) => (
-        <polygon key={i} points={p} fill="none" stroke="rgba(255,130,0,0.12)" strokeWidth="1.2" />
-      ))}
+      <defs>
+        <pattern id="svc-hex" width="83" height="144" patternUnits="userSpaceOnUse">
+          <path d="M42,0 L83,24 L83,72 L42,96 L0,72 L0,24 Z M42,96 L42,144" fill="none" stroke="rgba(255,130,0,0.13)" strokeWidth="1" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#svc-hex)" />
     </svg>
   );
 }
@@ -761,7 +749,7 @@ function GymEquipmentMarqueeSection() {
   const trackW = EQUIP_MARQUEE_HALF_W + 16;
 
   return (
-    <section style={{ padding: "80px 0 88px", position: "relative", zIndex: 1, background: "#050505" }}>
+    <section style={{ padding: "120px 0 120px", position: "relative", zIndex: 1, background: "#050505" }}>
       <style>{`
         @keyframes equip-scroll {
           0%   { transform: translateX(0); }
@@ -839,7 +827,7 @@ function EquipmentMarqueeSection() {
   const trackW = MARQUEE_HALF_W + 16; // one full set including trailing gap
 
   return (
-    <section style={{ padding: "80px 0 88px", position: "relative", zIndex: 1 }}>
+    <section style={{ padding: "120px 0 120px", position: "relative", zIndex: 1 }}>
       <style>{`
         @keyframes products-scroll {
           0%   { transform: translateX(0); }
@@ -998,12 +986,12 @@ export default function ServicesPage() {
           <SparklesCore
             className="w-full h-full"
             background="transparent"
-            minSize={0.4}
-            maxSize={1}
-            particleDensity={1200}
+            minSize={0.3}
+            maxSize={0.8}
+            particleDensity={220}
             particleColor="#FF8200"
-            speed={2.5}
-            starField={true}
+            speed={1.8}
+            starField={false}
           />
           <div style={{
             position: "absolute",
@@ -1085,6 +1073,7 @@ export default function ServicesPage() {
           backdropFilter: "blur(12px)",
           position: "relative",
           zIndex: 1,
+          padding: "48px 0",
         }}
       >
         <div
@@ -1144,7 +1133,7 @@ export default function ServicesPage() {
       </div>
 
       {/* ── Services section ── */}
-      <section className="rsp-section" style={{ padding: "72px 60px 80px", position: "relative", zIndex: 1 }}>
+      <section className="rsp-section" style={{ padding: "120px 60px 120px", position: "relative", zIndex: 1 }}>
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 24, filter: "blur(6px)" }}
@@ -1222,7 +1211,7 @@ export default function ServicesPage() {
       <EquipmentMarqueeSection />
 
       {/* ── CTA Banner ── */}
-      <section style={{ position: "relative", padding: "120px 60px", background: "transparent", textAlign: "center", overflow: "hidden", zIndex: 1 }}>
+      <section style={{ position: "relative", padding: "160px 60px", background: "transparent", textAlign: "center", overflow: "hidden", zIndex: 1 }}>
         <HexBg />
         {/* Warm gradient wash */}
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(8,8,8,0) 0%, rgba(20,10,4,0.92) 30%, rgba(20,10,4,0.92) 70%, rgba(8,8,8,0) 100%)", pointerEvents: "none", zIndex: 0 }} />

@@ -8,34 +8,17 @@ import HealthifyCard from "../_components/HealthifyCard";
 // ─── Hex grid SVG background ──────────────────────────────────────────────────
 
 function HexBackground() {
-  const R = 52;
-  const drawR = R - 5;
-  const hx = R * Math.sqrt(3);
-  const vy = R * 1.5;
-
-  const pts = (cx: number, cy: number) =>
-    Array.from({ length: 6 }, (_, i) => {
-      const a = (Math.PI / 3) * i - Math.PI / 6;
-      return `${(cx + drawR * Math.cos(a)).toFixed(1)},${(cy + drawR * Math.sin(a)).toFixed(1)}`;
-    }).join(" ");
-
-  const hexes: string[] = [];
-  for (let row = -1; row <= 11; row++) {
-    for (let col = -1; col <= 20; col++) {
-      const cx = col * hx + (row % 2 !== 0 ? hx / 2 : 0);
-      const cy = row * vy;
-      hexes.push(pts(cx, cy));
-    }
-  }
-
   return (
     <svg
       style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0 }}
       xmlns="http://www.w3.org/2000/svg"
     >
-      {hexes.map((p, i) => (
-        <polygon key={i} points={p} fill="none" stroke="rgba(255,130,0,0.12)" strokeWidth="1.2" />
-      ))}
+      <defs>
+        <pattern id="mem-hex" width="83" height="144" patternUnits="userSpaceOnUse">
+          <path d="M42,0 L83,24 L83,72 L42,96 L0,72 L0,24 Z M42,96 L42,144" fill="none" stroke="rgba(255,130,0,0.13)" strokeWidth="1" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#mem-hex)" />
     </svg>
   );
 }

@@ -10,7 +10,12 @@ import { BRANCHES } from "@/lib/constants";
 function HexBackground() {
   return (
     <svg
-      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0 }}
+      style={{
+        position: "absolute", inset: 0, width: "100%", height: "100%",
+        pointerEvents: "none", zIndex: 0,
+        maskImage: "linear-gradient(to bottom, transparent, black 96px, black calc(100% - 96px), transparent)",
+        WebkitMaskImage: "linear-gradient(to bottom, transparent, black 96px, black calc(100% - 96px), transparent)",
+      }}
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>

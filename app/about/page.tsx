@@ -435,7 +435,15 @@ function TrainersSection() {
 
 function HexBackground() {
   return (
-    <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0 }} xmlns="http://www.w3.org/2000/svg">
+    <svg
+      style={{
+        position: "absolute", inset: 0, width: "100%", height: "100%",
+        pointerEvents: "none", zIndex: 0,
+        maskImage: "linear-gradient(to bottom, transparent, black 96px, black calc(100% - 96px), transparent)",
+        WebkitMaskImage: "linear-gradient(to bottom, transparent, black 96px, black calc(100% - 96px), transparent)",
+      }}
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <defs>
         <pattern id="about-hex" width="83" height="144" patternUnits="userSpaceOnUse">
           <path d="M42,0 L83,24 L83,72 L42,96 L0,72 L0,24 Z M42,96 L42,144" fill="none" stroke="rgba(255,130,0,0.15)" strokeWidth="1" />
