@@ -197,7 +197,7 @@ export default function OurJourney() {
               {/* Left slot */}
               {stop.side === "left" ? (
                 <div className="jcard" style={{ gridColumn: 1, textAlign: "right", paddingRight: "48px" }}>
-                  <span style={{ display: "block", fontFamily: "var(--font-bebas)", fontSize: "clamp(4rem,7vw,6.5rem)", color: "rgba(255,130,0,0.07)", lineHeight: 1, marginBottom: "-12px", userSelect: "none" }}>{stop.num}</span>
+                  <span style={{ display: "block", fontFamily: "var(--font-bebas)", fontSize: "clamp(4rem,7vw,6.5rem)", color: "rgba(255,130,0,0.18)", lineHeight: 1, marginBottom: "-12px", userSelect: "none" }}>{stop.num}</span>
                   <h3 style={{ fontFamily: "var(--font-bebas)", fontSize: "clamp(1.6rem,2.6vw,2.2rem)", color: "#F5F0EB", letterSpacing: "0.04em", lineHeight: 1, marginBottom: "14px" }}>{stop.title}</h3>
                   <p style={{ fontFamily: "var(--font-body)", fontSize: "0.875rem", fontWeight: 300, color: "#aaaaaa", lineHeight: 1.85, maxWidth: "340px", marginLeft: "auto" }}>{stop.text}</p>
                 </div>
@@ -213,7 +213,7 @@ export default function OurJourney() {
               {/* Right slot */}
               {stop.side === "right" ? (
                 <div className="jcard" style={{ gridColumn: 3, textAlign: "left", paddingLeft: "48px" }}>
-                  <span style={{ display: "block", fontFamily: "var(--font-bebas)", fontSize: "clamp(4rem,7vw,6.5rem)", color: "rgba(255,130,0,0.07)", lineHeight: 1, marginBottom: "-12px", userSelect: "none" }}>{stop.num}</span>
+                  <span style={{ display: "block", fontFamily: "var(--font-bebas)", fontSize: "clamp(4rem,7vw,6.5rem)", color: "rgba(255,130,0,0.18)", lineHeight: 1, marginBottom: "-12px", userSelect: "none" }}>{stop.num}</span>
                   <h3 style={{ fontFamily: "var(--font-bebas)", fontSize: "clamp(1.6rem,2.6vw,2.2rem)", color: "#F5F0EB", letterSpacing: "0.04em", lineHeight: 1, marginBottom: "14px" }}>{stop.title}</h3>
                   <p style={{ fontFamily: "var(--font-body)", fontSize: "0.875rem", fontWeight: 300, color: "#aaaaaa", lineHeight: 1.85, maxWidth: "340px" }}>{stop.text}</p>
                 </div>
