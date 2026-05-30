@@ -978,7 +978,13 @@ export default function ServicesPage() {
         </motion.h1>
 
         {/* Gradient lines + focused particles */}
-        <div style={{ position: "relative", width: "min(40rem, 100vw)", height: "8rem" }}>
+        <div style={{
+          position: "relative",
+          width: "min(40rem, 100vw)",
+          height: "8rem",
+          maskImage: "radial-gradient(ellipse 75% 100% at 50% 0%, black 30%, transparent 100%)",
+          WebkitMaskImage: "radial-gradient(ellipse 75% 100% at 50% 0%, black 30%, transparent 100%)",
+        }}>
           <div style={{ position: "absolute", top: 0, left: "12.5%", width: "75%", height: "2px", background: "linear-gradient(to right, transparent, #FF8200, transparent)", filter: "blur(4px)" }} />
           <div style={{ position: "absolute", top: 0, left: "12.5%", width: "75%", height: "1px", background: "linear-gradient(to right, transparent, #FF8200, transparent)" }} />
           <div style={{ position: "absolute", top: 0, left: "37.5%", width: "25%", height: "5px", background: "linear-gradient(to right, transparent, #FF8200, transparent)", filter: "blur(4px)" }} />
@@ -986,21 +992,13 @@ export default function ServicesPage() {
           <SparklesCore
             className="w-full h-full"
             background="transparent"
-            minSize={0.3}
-            maxSize={0.8}
-            particleDensity={220}
+            minSize={0.4}
+            maxSize={1}
+            particleDensity={1200}
             particleColor="#FF8200"
-            speed={1.8}
-            starField={false}
+            speed={2.5}
+            starField={true}
           />
-          <div style={{
-            position: "absolute",
-            inset: 0,
-            background: "#0d0d0d",
-            WebkitMaskImage: "radial-gradient(350px 200px at top, transparent 20%, white)",
-            maskImage: "radial-gradient(350px 200px at top, transparent 20%, white)",
-            pointerEvents: "none",
-          }} />
         </div>
 
         {/* CTA buttons */}
