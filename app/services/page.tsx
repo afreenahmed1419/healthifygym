@@ -333,23 +333,18 @@ function ServicesParticles() {
 
 // ─── Hex background ───────────────────────────────────────────────────────────
 
-function HexBg({ pid = "svc-hex" }: { pid?: string }) {
+function HexBg() {
   return (
     <svg
-      style={{
-        position: "absolute", inset: 0, width: "100%", height: "100%",
-        pointerEvents: "none", zIndex: 0,
-        maskImage: "linear-gradient(to bottom, transparent, black 72px, black calc(100% - 72px), transparent)",
-        WebkitMaskImage: "linear-gradient(to bottom, transparent, black 72px, black calc(100% - 72px), transparent)",
-      }}
+      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0 }}
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
-        <pattern id={pid} width="83" height="144" patternUnits="userSpaceOnUse">
+        <pattern id="svc-hex" width="83" height="144" patternUnits="userSpaceOnUse">
           <path d="M42,0 L83,24 L83,72 L42,96 L0,72 L0,24 Z M42,96 L42,144" fill="none" stroke="rgba(255,130,0,0.13)" strokeWidth="1" />
         </pattern>
       </defs>
-      <rect width="100%" height="100%" fill={`url(#${pid})`} />
+      <rect width="100%" height="100%" fill="url(#svc-hex)" />
     </svg>
   );
 }
@@ -749,8 +744,7 @@ function GymEquipmentMarqueeSection() {
   const trackW = EQUIP_MARQUEE_HALF_W + 16;
 
   return (
-    <section style={{ padding: "120px 0 120px", position: "relative", zIndex: 1, background: "#050505" }}>
-      <HexBg pid="equip-hex" />
+    <section style={{ padding: "120px 0 120px", position: "relative", zIndex: 1 }}>
       <style>{`
         @keyframes equip-scroll {
           0%   { transform: translateX(0); }
@@ -788,8 +782,8 @@ function GymEquipmentMarqueeSection() {
       </motion.div>
 
       <div style={{ overflow: "hidden", position: "relative" }}>
-        <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 140, background: "linear-gradient(to right, #050505, transparent)", zIndex: 2, pointerEvents: "none" }} />
-        <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 140, background: "linear-gradient(to left, #050505, transparent)", zIndex: 2, pointerEvents: "none" }} />
+        <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 140, background: "linear-gradient(to right, #0d0d0d, transparent)", zIndex: 2, pointerEvents: "none" }} />
+        <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 140, background: "linear-gradient(to left, #0d0d0d, transparent)", zIndex: 2, pointerEvents: "none" }} />
 
         <div className="equip-track">
           {[...EQUIPMENT_IMAGES, ...EQUIPMENT_IMAGES].map((src, i) => (
@@ -1211,7 +1205,6 @@ export default function ServicesPage() {
 
       {/* ── CTA Banner ── */}
       <section style={{ position: "relative", padding: "160px 60px", background: "transparent", textAlign: "center", overflow: "hidden", zIndex: 1 }}>
-        <HexBg />
         {/* Warm gradient wash */}
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(8,8,8,0) 0%, rgba(20,10,4,0.92) 30%, rgba(20,10,4,0.92) 70%, rgba(8,8,8,0) 100%)", pointerEvents: "none", zIndex: 0 }} />
         {/* Central orange glow */}
