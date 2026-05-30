@@ -333,7 +333,7 @@ function ServicesParticles() {
 
 // ─── Hex background ───────────────────────────────────────────────────────────
 
-function HexBg() {
+function HexBg({ pid = "svc-hex" }: { pid?: string }) {
   return (
     <svg
       style={{
@@ -345,11 +345,11 @@ function HexBg() {
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
-        <pattern id="svc-hex" width="83" height="144" patternUnits="userSpaceOnUse">
+        <pattern id={pid} width="83" height="144" patternUnits="userSpaceOnUse">
           <path d="M42,0 L83,24 L83,72 L42,96 L0,72 L0,24 Z M42,96 L42,144" fill="none" stroke="rgba(255,130,0,0.13)" strokeWidth="1" />
         </pattern>
       </defs>
-      <rect width="100%" height="100%" fill="url(#svc-hex)" />
+      <rect width="100%" height="100%" fill={`url(#${pid})`} />
     </svg>
   );
 }
@@ -750,6 +750,7 @@ function GymEquipmentMarqueeSection() {
 
   return (
     <section style={{ padding: "120px 0 120px", position: "relative", zIndex: 1, background: "#050505" }}>
+      <HexBg pid="equip-hex" />
       <style>{`
         @keyframes equip-scroll {
           0%   { transform: translateX(0); }
