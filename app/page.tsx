@@ -669,6 +669,7 @@ function CTABanner() {
           transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
           style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "16px", flexWrap: "wrap" }}
         >
+          <Link href="/memberships" style={{ textDecoration: "none" }}>
           <motion.button
             whileHover={{ scale: 1.04, boxShadow: "0 8px 40px rgba(255,130,0,0.5)" }}
             whileTap={{ scale: 0.97 }}
@@ -694,7 +695,9 @@ function CTABanner() {
               <path d="M3 8h10M9 4l4 4-4 4" stroke="#080808" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </motion.button>
+          </Link>
 
+          <Link href="/contact" style={{ textDecoration: "none" }}>
           <motion.button
             whileHover={{ borderColor: "rgba(255,130,0,0.5)", color: "#F5F0EB" }}
             whileTap={{ scale: 0.97 }}
@@ -715,6 +718,7 @@ function CTABanner() {
           >
             VISIT THE GYM
           </motion.button>
+          </Link>
         </motion.div>
       </div>
     </section>
