@@ -39,16 +39,10 @@ export const metadata: Metadata = {
   description:
     "Empowering women from 14 to 65 to build strength, confidence and a healthier, unstoppable tomorrow.",
   keywords: ["women fitness", "ladies gym", "healthify", "strength training", "women wellness", "India"],
-  icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
-    shortcut: "/logo.png",
-  },
   openGraph: {
     title: "Healthify — Exclusive Ladies Fitness Club",
     description: "Strength Is Her Power. Join 2500+ women transforming their lives.",
     type: "website",
-    images: [{ url: "/logo.png" }],
   },
 };
 
