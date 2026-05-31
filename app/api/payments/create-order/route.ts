@@ -1,17 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const BACKEND = process.env.BACKEND_URL ?? "http://localhost:5000";
+import { verifyJWT } from "@/lib/jwt.server";
+import { createRazorpayOrder } from "@/lib/razorpay.server";
 
 export async function POST(req: NextRequest) {
-  const auth = req.headers.get("Authorization") ?? "";
-  const body = await req.text();
+  try {
+    const auth = req.headers.get("Authorization") ?? "";
+    const user = verifyJWT(auth.replace("Bearer ", "").trim());
+    if (!user) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
 
-  const res = await fetch(`${BACKEND}/api/payments/order`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: auth },
-    body,
-  });
+    const { amount, purpose } = await req.json() as { amount: number; purpose: string };
 
-  const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
+    const order = await createRazorpayOrder(amount, purpose, user.userId);
+    if (!order) {
+      return NextResponse.json({ success: false, message: "Payment service unavailable. Please try again." }, { status: 503 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        orderId: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        keyId: process.env.RAZORPAY_KEY_ID,
+      },
+    }, { status: 201 });
+  } catch (err) {
+    console.error("[payments/create-order]", err);
+    return NextResponse.json({ success: false, message: "Failed to create payment order." }, { status: 500 });
+  }
 }
