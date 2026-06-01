@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
       bookingDate: string;
       bookingTime: string;
       amount: number;
+      whatsappNumber?: string;
       notes?: string;
     };
 
@@ -46,7 +47,7 @@ export async function POST(req: NextRequest) {
       razorpay_payment_id: razorpayOrder.id,
       payment_status: "pending",
       owner_notified: false,
-      notes: body.notes ?? null,
+      notes: JSON.stringify({ whatsapp: body.whatsappNumber ?? null, extra: body.notes ?? null }),
     }).select().single();
 
     if (error || !booking) {

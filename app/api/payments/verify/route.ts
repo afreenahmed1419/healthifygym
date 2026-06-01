@@ -80,6 +80,13 @@ async function confirmPayment(
 
   const { data: userData } = await db.from("users").select("*").eq("id", finalUserId).single();
   if (userData) {
+    // Extract WhatsApp number stored at booking time, fall back to user's mobile
+    let userWhatsapp = userData.whatsapp_number;
+    try {
+      const notes = JSON.parse(booking.notes ?? "{}") as { whatsapp?: string };
+      if (notes.whatsapp) userWhatsapp = notes.whatsapp;
+    } catch { /* use default */ }
+
     Promise.allSettled([
       sendOwnerBookingNotification({
         userName: userData.name,
@@ -90,7 +97,7 @@ async function confirmPayment(
         amountPaise: booking.payment_amount,
         bookingId: booking.id,
       }),
-      sendUserBookingConfirmation(userData.whatsapp_number, {
+      sendUserBookingConfirmation(userWhatsapp, {
         serviceName: booking.service_name,
         date: booking.booking_date,
         time: booking.booking_time,

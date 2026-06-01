@@ -433,6 +433,7 @@ function BookingSection({ selectedPlan, onChangePlan }: { selectedPlan: string; 
   const [bName, setBName] = useState("");
   const [bEmail, setBEmail] = useState("");
   const [bPhone, setBPhone] = useState("");
+  const [bWhatsapp, setBWhatsapp] = useState("");
   const [bGoal, setBGoal] = useState("Weight Gain");
   const [bErrors, setBErrors] = useState<Record<string, string>>({});
   const [bLoading, setBLoading] = useState(false);
@@ -457,6 +458,7 @@ function BookingSection({ selectedPlan, onChangePlan }: { selectedPlan: string; 
     if (!bName.trim()) errs.name = "Name is required";
     if (!bEmail.trim()) errs.email = "Email is required";
     if (!bPhone.trim()) errs.phone = "Phone is required";
+    if (!bWhatsapp.trim()) errs.whatsapp = "WhatsApp number is required";
     setBErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
@@ -470,6 +472,7 @@ function BookingSection({ selectedPlan, onChangePlan }: { selectedPlan: string; 
         userName: bName,
         email: bEmail,
         phone: bPhone,
+        whatsappNumber: bWhatsapp,
         goal: bGoal,
       });
       const { razorpayOrder } = res.data;
@@ -726,6 +729,19 @@ function BookingSection({ selectedPlan, onChangePlan }: { selectedPlan: string; 
                   style={iStyle(focused === "bPhone", !!bErrors.phone)}
                 />
                 {bErrors.phone && <span style={{ fontFamily: "var(--font-display)", fontSize: "10px", color: "rgba(255,80,80,0.8)", marginTop: "4px", display: "block" }}>{bErrors.phone}</span>}
+              </div>
+              <div>
+                <label style={labelStyle}>WHATSAPP NUMBER</label>
+                <input
+                  type="tel"
+                  value={bWhatsapp}
+                  placeholder="+91 98765 43210"
+                  onChange={(e) => { setBWhatsapp(e.target.value); setBErrors((p) => ({ ...p, whatsapp: "" })); }}
+                  onFocus={() => setFocused("bWhatsapp")}
+                  onBlur={() => setFocused(null)}
+                  style={iStyle(focused === "bWhatsapp", !!bErrors.whatsapp)}
+                />
+                {bErrors.whatsapp && <span style={{ fontFamily: "var(--font-display)", fontSize: "10px", color: "rgba(255,80,80,0.8)", marginTop: "4px", display: "block" }}>{bErrors.whatsapp}</span>}
               </div>
               <div style={{ gridColumn: "1 / -1" }}>
                 <label style={labelStyle}>YOUR GOAL</label>
