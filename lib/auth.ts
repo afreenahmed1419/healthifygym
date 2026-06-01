@@ -28,7 +28,7 @@ export function maskPhone(phone: string): string {
   const clean = phone.replace(/\D/g, "");
   if (clean.length < 5) return phone;
   const last5 = clean.slice(-5);
-  return `+91 XXXXX ${last5}`;
+  return `XXXXX ${last5}`;
 }
 
 // ─── OTP ────────────────────────────────────────────────────────────────────
