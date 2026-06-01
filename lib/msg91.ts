@@ -1,43 +1,29 @@
-import axios from "axios";
+// WhatsApp notifications via Fast2SMS (replaces MSG91)
 
-const API_URL = "https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/";
+const BASE = "https://www.fast2sms.com/dev";
 
 function normalise(phone: string) {
-  return phone.replace(/^\+/, "");
+  return phone.replace(/^\+/, "").replace(/\D/g, "");
 }
 
-async function post(payload: object): Promise<boolean> {
-  const authKey = process.env.MSG91_AUTH_KEY;
-  if (!authKey) {
-    console.log("[MSG91] Not configured — skipping notification.");
+async function sendWhatsApp(numbers: string, message: string): Promise<boolean> {
+  const apiKey = process.env.FAST2SMS_API_KEY;
+  if (!apiKey) {
+    console.log("[Fast2SMS WA] Not configured — skipping notification.");
     return false;
   }
   try {
-    await axios.post(API_URL, payload, {
-      headers: { authkey: authKey, "content-type": "application/json" },
+    const res = await fetch(`${BASE}/wa-group`, {
+      method: "POST",
+      headers: { authorization: apiKey, "Content-Type": "application/json" },
+      body: JSON.stringify({ message, numbers }),
     });
-    return true;
-  } catch (err: unknown) {
-    const e = err as { response?: { data?: unknown } };
-    console.error("[MSG91]", e?.response?.data ?? err);
+    const data = await res.json() as { return?: boolean };
+    return data.return === true;
+  } catch (err) {
+    console.error("[Fast2SMS WA]", err);
     return false;
   }
-}
-
-function template(to: string, name: string, components: object[]) {
-  return {
-    integrated_number: process.env.MSG91_SENDER_NUMBER ?? "15559838251",
-    content_type: "template",
-    payload: {
-      to: normalise(to),
-      type: "template",
-      template: {
-        name,
-        language: { code: "en", policy: "deterministic" },
-        components,
-      },
-    },
-  };
 }
 
 export async function sendOwnerBookingNotification(details: {
@@ -51,24 +37,24 @@ export async function sendOwnerBookingNotification(details: {
 }): Promise<void> {
   const ownerPhone = process.env.OWNER_WHATSAPP_NUMBER;
   if (!ownerPhone) return;
+
   const shortId = details.bookingId.slice(0, 8).toUpperCase();
   const amountRupees = (details.amountPaise / 100).toFixed(0);
-  await post(
-    template(ownerPhone, process.env.MSG91_OWNER_NOTIF_TEMPLATE ?? "healthify_owner_booking", [
-      {
-        type: "body",
-        parameters: [
-          { type: "text", text: details.userName ?? "New Member" },
-          { type: "text", text: details.userPhone },
-          { type: "text", text: details.serviceName },
-          { type: "text", text: details.date },
-          { type: "text", text: details.time },
-          { type: "text", text: `₹${amountRupees}` },
-          { type: "text", text: `BK-${shortId}` },
-        ],
-      },
-    ])
-  );
+  const ist = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata", hour12: true });
+
+  const message =
+    `🎉 NEW BOOKING CONFIRMED\n\n` +
+    `Name: ${details.userName ?? "New Member"}\n` +
+    `Phone: ${details.userPhone}\n` +
+    `Service: ${details.serviceName}\n` +
+    `Date: ${details.date}\n` +
+    `Time: ${details.time}\n` +
+    `Amount: ₹${amountRupees} ✅\n` +
+    `Booking ID: BK-${shortId}\n` +
+    `At: ${ist}\n\n` +
+    `— Healthify Women's Fitness Club`;
+
+  await sendWhatsApp(normalise(ownerPhone), message);
 }
 
 export async function sendUserBookingConfirmation(
@@ -76,17 +62,14 @@ export async function sendUserBookingConfirmation(
   details: { serviceName: string; date: string; time: string; bookingId: string }
 ): Promise<void> {
   const shortId = details.bookingId.slice(0, 8).toUpperCase();
-  await post(
-    template(phone, process.env.MSG91_BOOKING_TEMPLATE ?? "healthify_booking_confirmed", [
-      {
-        type: "body",
-        parameters: [
-          { type: "text", text: details.serviceName },
-          { type: "text", text: details.date },
-          { type: "text", text: details.time },
-          { type: "text", text: `BK-${shortId}` },
-        ],
-      },
-    ])
-  );
+
+  const message =
+    `✅ Booking Confirmed — Healthify\n\n` +
+    `Service: ${details.serviceName}\n` +
+    `Date: ${details.date}\n` +
+    `Time: ${details.time}\n` +
+    `Booking ID: BK-${shortId}\n\n` +
+    `See you there! 💪\n— Healthify Women's Fitness Club`;
+
+  await sendWhatsApp(normalise(phone), message);
 }
