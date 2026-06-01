@@ -4,12 +4,12 @@ import { useState, useRef, useEffect, useCallback, KeyboardEvent, ClipboardEvent
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import { signInWithPhoneNumber, RecaptchaVerifier, ConfirmationResult } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
-import { validatePhoneNumber, maskPhone } from "@/lib/auth";
+import { validatePhoneNumber, maskPhone, formatIndianPhone } from "@/lib/auth";
 import { OTP_CONFIG } from "@/lib/constants";
-import type { OTPStep, SendOTPResponse, VerifyOTPResponse } from "@/lib/types";
-
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL?.trim() || "";
+import type { OTPStep, VerifyOTPResponse } from "@/lib/types";
 
 // ─── Animation variants ──────────────────────────────────────────────────────
 
@@ -167,7 +167,9 @@ export default function OTPModal({ isOpen, onClose, onSuccess }: OTPModalProps) 
   const [digits, setDigits]           = useState<string[]>(Array(6).fill(""));
   const [otpError, setOtpError]       = useState("");
   const [loading, setLoading]         = useState(false);
-  const [expiresAt, setExpiresAt]     = useState<string | null>(null);
+
+  const recaptchaRef = useRef<RecaptchaVerifier | null>(null);
+  const confirmationRef = useRef<ConfirmationResult | null>(null);
 
   const otpActive = step === "verify";
   const { remaining, formatted: countdown } = useCountdown(OTP_CONFIG.expiryMinutes * 60, otpActive);
@@ -192,15 +194,23 @@ export default function OTPModal({ isOpen, onClose, onSuccess }: OTPModalProps) 
     if (!validatePhoneNumber(phone)) { setPhoneError("Enter a valid 10-digit Indian mobile number."); return; }
     setPhoneError(""); setLoading(true);
     try {
-      const { data } = await axios.post<SendOTPResponse>(`${BACKEND_API_URL}/api/auth/send-otp`, { whatsappNumber: phone });
-      if (data.success) {
-        setExpiresAt(data.expiresAt ?? null);
-        setDigits(Array(6).fill("")); setOtpError("");
-        if (!isResend) setStep("verify");
-        setResendCooldown(OTP_CONFIG.resendCooldown);
-      } else { setPhoneError(data.message || "Failed to send OTP."); }
+      // Reset recaptcha on resend
+      if (isResend && recaptchaRef.current) {
+        recaptchaRef.current.clear();
+        recaptchaRef.current = null;
+      }
+      if (!recaptchaRef.current) {
+        recaptchaRef.current = new RecaptchaVerifier(auth, "recaptcha-container", { size: "invisible" });
+      }
+      const formattedPhone = formatIndianPhone(phone);
+      confirmationRef.current = await signInWithPhoneNumber(auth, formattedPhone, recaptchaRef.current);
+      setDigits(Array(6).fill("")); setOtpError("");
+      if (!isResend) setStep("verify");
+      setResendCooldown(OTP_CONFIG.resendCooldown);
     } catch (err: unknown) {
-      const msg = axios.isAxiosError(err) && err.response?.data?.message ? err.response.data.message : "Failed to send OTP. Please try again.";
+      console.error("[Firebase OTP]", err);
+      recaptchaRef.current = null;
+      const msg = (err as { message?: string })?.message ?? "Failed to send OTP. Please try again.";
       setPhoneError(msg);
     } finally { setLoading(false); }
   }, [phone]);
@@ -208,19 +218,24 @@ export default function OTPModal({ isOpen, onClose, onSuccess }: OTPModalProps) 
   const verifyOTP = useCallback(async () => {
     const otp = digits.join("");
     if (otp.length < 6) { setOtpError("Enter all 6 digits."); return; }
+    if (!confirmationRef.current) { setOtpError("Session expired. Please resend OTP."); return; }
     setOtpError(""); setLoading(true);
     try {
-      const { data } = await axios.post<VerifyOTPResponse>(`${BACKEND_API_URL}/api/auth/verify-otp`, { whatsappNumber: phone, otp });
+      const result = await confirmationRef.current.confirm(otp);
+      const firebaseToken = await result.user.getIdToken();
+      const { data } = await axios.post<VerifyOTPResponse>("/api/auth/verify-otp", { firebaseToken });
       if (data.success && data.user) {
         login(data.user, data.token);
         setStep("success");
         setTimeout(() => { onSuccess?.(); onClose(); }, 2000);
       } else { setOtpError(data.message || "Verification failed."); }
     } catch (err: unknown) {
-      const msg = axios.isAxiosError(err) && err.response?.data?.message ? err.response.data.message : "Verification failed. Please try again.";
+      const msg = axios.isAxiosError(err) && err.response?.data?.message
+        ? err.response.data.message
+        : "Invalid OTP. Please check and try again.";
       setOtpError(msg);
     } finally { setLoading(false); }
-  }, [digits, phone, login, onSuccess, onClose]);
+  }, [digits, login, onSuccess, onClose]);
 
   useEffect(() => {
     if (step === "verify" && digits.every(Boolean) && !loading) verifyOTP();
@@ -285,6 +300,8 @@ export default function OTPModal({ isOpen, onClose, onSuccess }: OTPModalProps) 
                 pointerEvents: "auto",
               }}
             >
+              {/* Firebase invisible reCAPTCHA container */}
+              <div id="recaptcha-container" />
               {/* Top glow line */}
               <div style={{ height: 2, background: "linear-gradient(to right, transparent, #FF8200 40%, #FF8200 60%, transparent)" }} />
 
