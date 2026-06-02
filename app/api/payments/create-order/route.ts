@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyJWT } from "@/lib/jwt.server";
+import { requireAuth } from "@/lib/api-auth";
 import { createRazorpayOrder } from "@/lib/razorpay.server";
 
 export async function POST(req: NextRequest) {
   try {
-    const auth = req.headers.get("Authorization") ?? "";
-    const user = verifyJWT(auth.replace("Bearer ", "").trim());
-    if (!user) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
+    const authResult = requireAuth(req);
+    if ("error" in authResult) return authResult.error;
+    const { user } = authResult;
 
     const { amount, purpose } = await req.json() as { amount: number; purpose: string };
 

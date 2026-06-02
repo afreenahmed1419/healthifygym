@@ -1,21 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase";
-import { verifyJWT } from "@/lib/jwt.server";
+import { requireAuth } from "@/lib/api-auth";
 import { createRazorpayOrder } from "@/lib/razorpay.server";
+import { sanitizeString } from "@/lib/sanitize";
 
 export async function POST(req: NextRequest) {
   try {
-    const auth = req.headers.get("Authorization") ?? "";
-    const user = verifyJWT(auth.replace("Bearer ", "").trim());
-    if (!user) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
+    const authResult = requireAuth(req);
+    if ("error" in authResult) return authResult.error;
+    const { user } = authResult;
 
-    const body = await req.json() as {
+    const raw = await req.json() as {
       serviceName: string;
       bookingDate: string;
       bookingTime: string;
       amount: number;
       whatsappNumber?: string;
       notes?: string;
+    };
+
+    const body = {
+      serviceName: sanitizeString(raw.serviceName),
+      bookingDate: sanitizeString(raw.bookingDate),
+      bookingTime: sanitizeString(raw.bookingTime),
+      amount: Number(raw.amount),
+      whatsappNumber: raw.whatsappNumber ? sanitizeString(raw.whatsappNumber) : undefined,
+      notes: raw.notes ? sanitizeString(raw.notes) : undefined,
     };
 
     const today = new Date(); today.setHours(0, 0, 0, 0);

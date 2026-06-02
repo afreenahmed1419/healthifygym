@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase-admin";
 import { generateJWT } from "@/lib/jwt.server";
 import { getAdminClient } from "@/lib/supabase";
+import { rateLimit } from "@/lib/rate-limit";
 import type { VerifyOTPResponse } from "@/lib/types";
 
 async function notifyOwnerOnSignup(userPhone: string): Promise<void> {
@@ -24,6 +25,16 @@ async function notifyOwnerOnSignup(userPhone: string): Promise<void> {
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit: 10 verify attempts per IP per 10 minutes
+    const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+    const rl = rateLimit(`verify:${ip}`, 10, 10 * 60 * 1000);
+    if (!rl.allowed) {
+      return NextResponse.json<VerifyOTPResponse>(
+        { success: false, message: "Too many attempts. Please wait a few minutes and try again." },
+        { status: 429 }
+      );
+    }
+
     const { firebaseToken } = await req.json() as { firebaseToken: string };
 
     if (!firebaseToken) {

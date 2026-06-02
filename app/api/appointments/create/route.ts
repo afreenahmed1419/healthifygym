@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase";
-import { verifyJWT } from "@/lib/jwt.server";
+import { requireAuth } from "@/lib/api-auth";
+import { sanitizeString } from "@/lib/sanitize";
 
 export async function POST(req: NextRequest) {
   try {
-    const auth = req.headers.get("Authorization") ?? "";
-    const user = verifyJWT(auth.replace("Bearer ", "").trim());
-    if (!user) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
+    const authResult = requireAuth(req);
+    if ("error" in authResult) return authResult.error;
+    const { user } = authResult;
 
-    const { message } = await req.json() as { message?: string };
+    const raw = await req.json() as { message?: string };
+    const message = raw.message ? sanitizeString(raw.message) : undefined;
 
     const db = getAdminClient();
 

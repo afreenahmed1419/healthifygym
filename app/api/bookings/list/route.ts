@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase";
-import { verifyJWT } from "@/lib/jwt.server";
+import { requireAuth } from "@/lib/api-auth";
 
 export async function GET(req: NextRequest) {
   try {
-    const auth = req.headers.get("Authorization") ?? "";
-    const user = verifyJWT(auth.replace("Bearer ", "").trim());
-    if (!user) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
+    const authResult = requireAuth(req);
+    if ("error" in authResult) return authResult.error;
+    const { user } = authResult;
 
     const params = req.nextUrl.searchParams;
     const limit = Math.min(parseInt(params.get("limit") ?? "10"), 50);

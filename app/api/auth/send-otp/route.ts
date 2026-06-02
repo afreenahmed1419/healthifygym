@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateOTP, hashOTP, otpExpiry, formatIndianPhone, validatePhoneNumber } from "@/lib/auth";
 import { getAdminClient } from "@/lib/supabase";
+import { rateLimit } from "@/lib/rate-limit";
 import type { SendOTPResponse } from "@/lib/types";
 
 async function sendOTPviaSMS(phone: string, otp: string): Promise<{ sent: boolean; error?: string }> {
@@ -38,6 +39,17 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { whatsappNumber } = body as { whatsappNumber: string };
+
+    // Rate limit: 5 OTP requests per phone per 10 minutes
+    const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+    const rlKey = `otp:${whatsappNumber ?? ip}`;
+    const rl = rateLimit(rlKey, 5, 10 * 60 * 1000);
+    if (!rl.allowed) {
+      return NextResponse.json<SendOTPResponse>(
+        { success: false, message: "Too many OTP requests. Please wait a few minutes and try again." },
+        { status: 429 }
+      );
+    }
 
     if (!whatsappNumber) {
       return NextResponse.json<SendOTPResponse>(

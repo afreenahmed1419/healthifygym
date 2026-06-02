@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyJWT } from "@/lib/jwt.server";
+import { requireAuth } from "@/lib/api-auth";
 import { verifyRazorpaySignature, verifyRazorpayWebhook } from "@/lib/razorpay.server";
 import { getAdminClient } from "@/lib/supabase";
 import { sendOwnerBookingNotification, sendUserBookingConfirmation } from "@/lib/msg91";
@@ -25,9 +25,9 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Client-side verification ──────────────────────────────────────
-  const auth = req.headers.get("Authorization") ?? "";
-  const user = verifyJWT(auth.replace("Bearer ", "").trim());
-  if (!user) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
+  const authResult = requireAuth(req);
+  if ("error" in authResult) return authResult.error;
+  const { user } = authResult;
 
   const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = await req.json() as {
     razorpayOrderId: string;
