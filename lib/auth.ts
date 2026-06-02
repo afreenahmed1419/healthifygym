@@ -2,7 +2,7 @@ import CryptoJS from "crypto-js";
 import { OTP_CONFIG } from "./constants";
 import type { User } from "./types";
 
-const OTP_SECRET = process.env.OTP_SECRET || "healthify-otp-secret-2024";
+const OTP_SECRET = process.env.OTP_SECRET || (() => { throw new Error("OTP_SECRET environment variable is not set."); })();
 const TOKEN_KEY = "healthify_token";
 const USER_KEY = "healthify_user";
 

@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   const webhookSig = req.headers.get("x-razorpay-signature");
 
   if (webhookSig) {
-    // ── Razorpay webhook ──────────────────────────────────────────────
+    // ── Razorpay webhook (verified by signature — no user context needed) ──
     const rawBody = await req.text();
     if (!verifyRazorpayWebhook(rawBody, webhookSig)) {
       return NextResponse.json({ success: false }, { status: 400 });
@@ -39,9 +39,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, message: "Payment verification failed. Invalid signature." }, { status: 400 });
   }
 
+  // Verify the booking belongs to this authenticated user before confirming
+  const db = getAdminClient();
+  const { data: bookingCheck } = await db
+    .from("bookings")
+    .select("id, user_id")
+    .eq("razorpay_payment_id", razorpayOrderId)
+    .single();
+
+  if (!bookingCheck) {
+    return NextResponse.json({ success: false, message: "Booking not found." }, { status: 404 });
+  }
+
+  if (bookingCheck.user_id !== user.userId) {
+    return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 403 });
+  }
+
   const booking = await confirmPayment(razorpayOrderId, razorpayPaymentId, null, "upi", user.userId);
   if (!booking) {
-    return NextResponse.json({ success: false, message: "Booking not found for this payment." }, { status: 404 });
+    return NextResponse.json({ success: false, message: "Failed to confirm booking." }, { status: 500 });
   }
 
   return NextResponse.json({ success: true, message: "Payment verified and booking confirmed." });
@@ -80,7 +96,6 @@ async function confirmPayment(
 
   const { data: userData } = await db.from("users").select("*").eq("id", finalUserId).single();
   if (userData) {
-    // Extract WhatsApp number stored at booking time, fall back to user's mobile
     let userWhatsapp = userData.whatsapp_number;
     try {
       const notes = JSON.parse(booking.notes ?? "{}") as { whatsapp?: string };
