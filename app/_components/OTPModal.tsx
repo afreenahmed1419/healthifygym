@@ -274,7 +274,6 @@ export default function OTPModal({ isOpen, onClose, onSuccess }: OTPModalProps) 
             initial="hidden"
             animate="visible"
             exit="hidden"
-            onClick={onClose}
             style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.82)", backdropFilter: "blur(8px)" }}
           />
 
