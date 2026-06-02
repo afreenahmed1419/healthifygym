@@ -4,6 +4,31 @@ import { requireAuth } from "@/lib/api-auth";
 import { createRazorpayOrder } from "@/lib/razorpay.server";
 import { sanitizeString } from "@/lib/sanitize";
 
+// Server-side price list in paise (₹ × 100) — single source of truth
+const MEMBERSHIP_PRICES: Record<string, number> = {
+  // Essential (Strength)
+  "Essential (Strength) — Monthly":        300000,
+  "Essential (Strength) — Quarterly":      600000,
+  "Essential (Strength) — Half Yearly":   1000000,
+  "Essential (Strength) — Yearly":        1800000,
+  "Essential (Strength) — PT Monthly":     550000,
+  "Essential (Strength) — PT Quarterly":  1500000,
+  "Essential (Strength) — PT Half Yearly":2700000,
+  // Yoga / Aerobics / Zumba
+  "Yoga / Aerobics / Zumba — Monthly":     300000,
+  "Yoga / Aerobics / Zumba — Quarterly":   600000,
+  "Yoga / Aerobics / Zumba — Half Yearly":1000000,
+  "Yoga / Aerobics / Zumba — Yearly":     1800000,
+  // Combo
+  "Strength + Zumba / Aerobics (Combo) — Monthly":     500000,
+  "Strength + Zumba / Aerobics (Combo) — Quarterly":  1000000,
+  "Strength + Zumba / Aerobics (Combo) — Half Yearly":1750000,
+  "Strength + Zumba / Aerobics (Combo) — Yearly":     3000000,
+  // Special
+  "Lifetime Membership":  300000,
+  "Drop-In Pass (Daily)":  25000,
+};
+
 export async function POST(req: NextRequest) {
   try {
     const authResult = requireAuth(req);
@@ -38,11 +63,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: "Booking time must be in HH:MM format." }, { status: 400 });
     }
 
-    if (!body.amount || body.amount <= 0 || body.amount > 1000000) {
-      return NextResponse.json({ success: false, message: "Amount must be between ₹1 and ₹10,000." }, { status: 400 });
+    // Look up the correct price server-side — never trust the client amount
+    const correctAmount = MEMBERSHIP_PRICES[body.serviceName];
+    if (!correctAmount) {
+      return NextResponse.json({ success: false, message: "Invalid service selected." }, { status: 400 });
     }
 
-    const razorpayOrder = await createRazorpayOrder(body.amount, body.serviceName, user.userId);
+    const razorpayOrder = await createRazorpayOrder(correctAmount, body.serviceName, user.userId);
     if (!razorpayOrder) {
       return NextResponse.json({ success: false, message: "Failed to create payment order. Please try again." }, { status: 500 });
     }
@@ -53,7 +80,7 @@ export async function POST(req: NextRequest) {
       service_name: body.serviceName,
       booking_date: body.bookingDate,
       booking_time: body.bookingTime,
-      payment_amount: body.amount,
+      payment_amount: correctAmount,
       razorpay_payment_id: razorpayOrder.id,
       payment_status: "pending",
       owner_notified: false,
