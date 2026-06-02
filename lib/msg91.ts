@@ -63,19 +63,17 @@ export async function sendOwnerBookingNotification(details: {
   const amountRupees = (details.amountPaise / 100).toFixed(0);
   const ist = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata", hour12: true });
 
-  const message =
-    `🎉 NEW BOOKING CONFIRMED\n\n` +
-    `Name: ${details.userName ?? "New Member"}\n` +
-    `Phone: ${details.userPhone}\n` +
-    `Service: ${details.serviceName}\n` +
-    `Date: ${details.date}\n` +
-    `Time: ${details.time}\n` +
-    `Amount: ₹${amountRupees} ✅\n` +
-    `Booking ID: BK-${shortId}\n` +
-    `At: ${ist}\n\n` +
-    `— Healthify Women's Fitness Club`;
-
-  await sendWhatsApp(normalise(ownerPhone), message);
+  // Use approved Fast2SMS template: healthify_owner_booking
+  await sendTemplate(normalise(ownerPhone), "healthify_owner_booking", {
+    "1": details.userName ?? "New Member",
+    "2": details.userPhone,
+    "3": details.serviceName,
+    "4": details.date,
+    "5": details.time,
+    "6": `₹${amountRupees}`,
+    "7": `BK-${shortId}`,
+  });
+  void ist; // suppress unused warning
 }
 
 export async function sendUserBookingConfirmation(
