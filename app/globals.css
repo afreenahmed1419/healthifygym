@@ -384,43 +384,68 @@ body {
   .mem-combo-row {
     display: flex !important;
     flex-direction: column !important;
-    gap: 8px !important;
-    padding: 14px 16px !important;
+    gap: 10px !important;
+    padding: 16px !important;
   }
 
   .mem-col-type {
-    font-size: 0.9rem !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
     flex-wrap: wrap !important;
     gap: 6px !important;
+    margin-bottom: 2px !important;
   }
 
-  /* Member + non-member prices sit on one line side by side */
+  /* Stack prices vertically with labels */
   .mem-prices-group {
     display: flex !important;
-    align-items: baseline !important;
-    gap: 4px !important;
-    flex-wrap: wrap !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  /* Each price row: label on left, price on right */
+  .mem-col-member,
+  .mem-col-nonmember {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
+    text-align: left !important;
   }
 
   .mem-col-member {
-    text-align: left !important;
+    background: rgba(255,130,0,0.08) !important;
+    border: 1px solid rgba(255,130,0,0.2) !important;
     font-size: 1rem !important;
   }
 
-  /* Separator between member and non-member price */
-  .mem-col-member::after {
-    content: "  ·  ";
-    color: rgba(245,240,235,0.2);
-    font-weight: 400;
-    font-size: 0.9rem;
-  }
-
   .mem-col-nonmember {
-    text-align: left !important;
-    font-size: 0.88rem !important;
+    background: rgba(255,255,255,0.03) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    font-size: 0.9rem !important;
   }
 
-  /* Combo table: price + benefit stack vertically */
+  /* Labels via ::before */
+  .mem-col-member::before {
+    content: "MEMBER";
+    font-family: var(--font-display);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: rgba(255,130,0,0.7);
+  }
+
+  .mem-col-nonmember::before {
+    content: "NON-MEMBER";
+    font-family: var(--font-display);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: rgba(245,240,235,0.35);
+  }
+
+  /* Combo table */
   .mem-combo-price {
     text-align: left !important;
     font-size: 1rem !important;
@@ -429,6 +454,7 @@ body {
   .mem-combo-benefit {
     text-align: left !important;
     font-size: 0.82rem !important;
+    color: #FF8200 !important;
   }
 
   /* Memberships: day picker — horizontal scroll */
