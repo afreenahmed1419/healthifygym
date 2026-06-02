@@ -2,7 +2,12 @@ import CryptoJS from "crypto-js";
 import { OTP_CONFIG } from "./constants";
 import type { User } from "./types";
 
-const OTP_SECRET = process.env.OTP_SECRET || (() => { throw new Error("OTP_SECRET environment variable is not set."); })();
+// OTP_SECRET is server-only — accessed lazily inside server functions only
+function getOTPSecret(): string {
+  const s = process.env.OTP_SECRET;
+  if (!s) throw new Error("OTP_SECRET environment variable is not set.");
+  return s;
+}
 const TOKEN_KEY = "healthify_token";
 const USER_KEY = "healthify_user";
 
@@ -38,7 +43,7 @@ export function generateOTP(): string {
 }
 
 export function hashOTP(otp: string, phone: string): string {
-  return CryptoJS.HmacSHA256(`${otp}:${phone}`, OTP_SECRET).toString();
+  return CryptoJS.HmacSHA256(`${otp}:${phone}`, getOTPSecret()).toString();
 }
 
 export function otpExpiry(): string {
