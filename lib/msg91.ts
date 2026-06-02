@@ -1,52 +1,47 @@
 // WhatsApp notifications via Fast2SMS
 
-const BASE = "https://www.fast2sms.com/dev";
+const FAST2SMS_PHONE_NUMBER_ID = "1116898334844898";
 
 function normalise(phone: string) {
-  return phone.replace(/^\+/, "").replace(/\D/g, "");
+  // Fast2SMS expects 10-digit number without country code
+  const digits = phone.replace(/\D/g, "");
+  return digits.length === 12 && digits.startsWith("91") ? digits.slice(2) : digits;
 }
 
-// Free-form message (for owner notifications — no template needed)
-async function sendWhatsApp(numbers: string, message: string): Promise<boolean> {
-  const apiKey = process.env.FAST2SMS_API_KEY;
-  if (!apiKey) { console.log("[Fast2SMS WA] Not configured — skipping."); return false; }
-  try {
-    const res = await fetch(`${BASE}/wa-group`, {
-      method: "POST",
-      headers: { authorization: apiKey, "Content-Type": "application/json" },
-      body: JSON.stringify({ message, numbers }),
-    });
-    const data = await res.json() as { return?: boolean };
-    return data.return === true;
-  } catch (err) {
-    console.error("[Fast2SMS WA free-form]", err);
-    return false;
-  }
-}
-
-// Template message (for approved templates)
+// Send approved WhatsApp template via Fast2SMS GET API
 async function sendTemplate(
-  numbers: string,
-  templateName: string,
-  variables: Record<string, string>
+  toPhone: string,
+  messageId: string,
+  variables: string[]
 ): Promise<boolean> {
   const apiKey = process.env.FAST2SMS_API_KEY;
-  if (!apiKey) { console.log("[Fast2SMS Template] Not configured — skipping."); return false; }
+  if (!apiKey) {
+    console.log("[Fast2SMS Template] FAST2SMS_API_KEY not configured — skipping.");
+    return false;
+  }
+
+  const params = new URLSearchParams({
+    authorization: apiKey,
+    message_id: messageId,
+    phone_number_id: FAST2SMS_PHONE_NUMBER_ID,
+    numbers: normalise(toPhone),
+    variables_values: variables.join("|"),
+  });
+
   try {
-    const res = await fetch(`${BASE}/wa-template`, {
-      method: "POST",
-      headers: { authorization: apiKey, "Content-Type": "application/json" },
-      body: JSON.stringify({ numbers, template_name: templateName, variables }),
+    const res = await fetch(`https://www.fast2sms.com/dev/whatsapp?${params.toString()}`, {
+      method: "GET",
     });
-    const data = await res.json() as { return?: boolean; message?: unknown };
-    if (data.return !== true) console.error("[Fast2SMS Template] Failed:", JSON.stringify(data));
-    return data.return === true;
+    const data = await res.json() as { status?: boolean; message?: string };
+    if (!data.status) console.error("[Fast2SMS Template] Failed:", JSON.stringify(data));
+    return data.status === true;
   } catch (err) {
-    console.error("[Fast2SMS Template]", err);
+    console.error("[Fast2SMS Template] Error:", err);
     return false;
   }
 }
 
+// Owner booking notification — uses approved template healthify_owner_booking (message_id: 22167)
 export async function sendOwnerBookingNotification(details: {
   userName: string | null;
   userPhone: string;
@@ -61,32 +56,29 @@ export async function sendOwnerBookingNotification(details: {
 
   const shortId = details.bookingId.slice(0, 8).toUpperCase();
   const amountRupees = (details.amountPaise / 100).toFixed(0);
-  const ist = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata", hour12: true });
 
-  // Use approved Fast2SMS template: healthify_owner_booking
-  await sendTemplate(normalise(ownerPhone), "healthify_owner_booking", {
-    "1": details.userName ?? "New Member",
-    "2": details.userPhone,
-    "3": details.serviceName,
-    "4": details.date,
-    "5": details.time,
-    "6": `₹${amountRupees}`,
-    "7": `BK-${shortId}`,
-  });
-  void ist; // suppress unused warning
+  await sendTemplate(ownerPhone, "22167", [
+    details.userName ?? "New Member",   // {{1}} Name
+    details.userPhone,                   // {{2}} Phone
+    details.serviceName,                 // {{3}} Service
+    details.date,                        // {{4}} Date
+    details.time,                        // {{5}} Time
+    `₹${amountRupees}`,                 // {{6}} Amount
+    `BK-${shortId}`,                    // {{7}} Booking ID
+  ]);
 }
 
+// User booking confirmation — uses approved template booking_confirmation_to_user (message_id: 22192)
 export async function sendUserBookingConfirmation(
   phone: string,
   details: { serviceName: string; date: string; time: string; bookingId: string }
 ): Promise<void> {
   const shortId = details.bookingId.slice(0, 8).toUpperCase();
 
-  // Use approved Fast2SMS template: booking_confirmation_to_user
-  await sendTemplate(normalise(phone), "booking_confirmation_to_user", {
-    "1": details.serviceName,
-    "2": details.date,
-    "3": details.time,
-    "4": `BK-${shortId}`,
-  });
+  await sendTemplate(phone, "22192", [
+    details.serviceName,   // {{1}} Service
+    details.date,          // {{2}} Date
+    details.time,          // {{3}} Time
+    `BK-${shortId}`,      // {{4}} Booking ID
+  ]);
 }
