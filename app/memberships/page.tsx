@@ -421,13 +421,38 @@ function iStyle(focused: boolean, hasError = false): React.CSSProperties {
   };
 }
 
+// ─── Slot time helpers ────────────────────────────────────────────────────────
+
+function parseSlotMinutes(slot: string): number {
+  const [time, period] = slot.split(" ");
+  const [h, m] = time.split(":").map(Number);
+  let hours = h;
+  if (period === "PM" && h !== 12) hours += 12;
+  if (period === "AM" && h === 12) hours = 0;
+  return hours * 60 + m;
+}
+
+function isSlotPassed(slot: string, dateStr: string): boolean {
+  const today = new Date().toISOString().split("T")[0];
+  if (dateStr !== today) return false;
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  // Block slots that start within the next 30 minutes or have already passed
+  return parseSlotMinutes(slot) <= currentMinutes + 30;
+}
+
+function firstAvailableSlot(branch: BranchId, dateStr: string): string {
+  const slots = BRANCH_SLOTS[branch];
+  return slots.find((s) => !isSlotPassed(s, dateStr)) ?? slots[slots.length - 1];
+}
+
 // ─── Booking Section ──────────────────────────────────────────────────────────
 
 function BookingSection({ selectedPlan, onChangePlan }: { selectedPlan: string; onChangePlan: () => void }) {
   const [days] = useState(() => generateNext7Days());
   const [selectedDay, setSelectedDay] = useState(days[0].dateStr);
   const [selectedBranch, setSelectedBranch] = useState<BranchId>("portblair");
-  const [selectedTime, setSelectedTime] = useState("6:00 AM");
+  const [selectedTime, setSelectedTime] = useState(() => firstAvailableSlot("portblair", days[0].dateStr));
 
   // Booking form
   const [bName, setBName] = useState("");
@@ -452,6 +477,11 @@ function BookingSection({ selectedPlan, onChangePlan }: { selectedPlan: string; 
   const [focused, setFocused] = useState<string | null>(null);
 
   const selectedDayObj = days.find((d) => d.dateStr === selectedDay) ?? days[0];
+
+  // Auto-select first available slot when day or branch changes
+  useEffect(() => {
+    setSelectedTime(firstAvailableSlot(selectedBranch, selectedDay));
+  }, [selectedDay, selectedBranch]);
 
   const handleBook = async () => {
     const errs: Record<string, string> = {};
@@ -649,7 +679,7 @@ function BookingSection({ selectedPlan, onChangePlan }: { selectedPlan: string; 
                 return (
                   <button
                     key={b.id}
-                    onClick={() => { setSelectedBranch(b.id); setSelectedTime(BRANCH_SLOTS[b.id][0]); }}
+                    onClick={() => { setSelectedBranch(b.id); setSelectedTime(firstAvailableSlot(b.id, selectedDay)); }}
                     style={{ flex: 1, padding: "10px 16px", background: active ? "rgba(255,130,0,0.12)" : "#1A1A1A", border: `1px solid ${active ? "#FF8200" : "rgba(255,130,0,0.15)"}`, borderRadius: "4px", fontFamily: "var(--font-display)", fontSize: "12px", fontWeight: 700, letterSpacing: "0.1em", color: active ? "#FF8200" : "rgba(245,240,235,0.5)", cursor: "pointer", transition: "all 0.2s" }}
                   >
                     {b.label.toUpperCase()}
@@ -669,19 +699,22 @@ function BookingSection({ selectedPlan, onChangePlan }: { selectedPlan: string; 
 
             <div className="rsp-timeslots" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px", marginBottom: "28px" }}>
               {BRANCH_SLOTS[selectedBranch].map((slot) => {
-                const active = selectedTime === slot;
-                const happy = HAPPY_HOURS.has(slot);
-                const borderColor = active ? (happy ? "#4ADE80" : "#FF8200") : happy ? "rgba(74,222,128,0.45)" : "rgba(255,130,0,0.15)";
-                const bgColor = active ? (happy ? "rgba(74,222,128,0.15)" : "rgba(255,130,0,0.12)") : happy ? "rgba(74,222,128,0.07)" : "#1A1A1A";
-                const textColor = active ? (happy ? "#4ADE80" : "#FF8200") : happy ? "#4ADE80" : "rgba(245,240,235,0.85)";
+                const passed = isSlotPassed(slot, selectedDay);
+                const active = selectedTime === slot && !passed;
+                const happy = HAPPY_HOURS.has(slot) && !passed;
+                const borderColor = passed ? "rgba(255,255,255,0.05)" : active ? (happy ? "#4ADE80" : "#FF8200") : happy ? "rgba(74,222,128,0.45)" : "rgba(255,130,0,0.15)";
+                const bgColor = passed ? "rgba(255,255,255,0.02)" : active ? (happy ? "rgba(74,222,128,0.15)" : "rgba(255,130,0,0.12)") : happy ? "rgba(74,222,128,0.07)" : "#1A1A1A";
+                const textColor = passed ? "rgba(245,240,235,0.18)" : active ? (happy ? "#4ADE80" : "#FF8200") : happy ? "#4ADE80" : "rgba(245,240,235,0.85)";
                 return (
                   <button
                     key={slot}
-                    onClick={() => setSelectedTime(slot)}
-                    style={{ padding: "12px 8px", background: bgColor, border: `1px solid ${borderColor}`, borderRadius: "4px", fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.06em", color: textColor, cursor: "pointer", transition: "all 0.2s", display: "flex", flexDirection: "column" as const, alignItems: "center", justifyContent: "center", gap: "4px", width: "100%" }}
+                    disabled={passed}
+                    onClick={() => !passed && setSelectedTime(slot)}
+                    style={{ padding: "12px 8px", background: bgColor, border: `1px solid ${borderColor}`, borderRadius: "4px", fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.06em", color: textColor, cursor: passed ? "not-allowed" : "pointer", transition: "all 0.2s", display: "flex", flexDirection: "column" as const, alignItems: "center", justifyContent: "center", gap: "4px", width: "100%", position: "relative" as const, opacity: passed ? 0.45 : 1 }}
                   >
                     {slot}
-                    {happy && (
+                    {passed && <span style={{ fontSize: "8px", letterSpacing: "0.1em", color: "rgba(245,240,235,0.25)", lineHeight: 1 }}>PASSED</span>}
+                    {happy && !passed && (
                       <span style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.12em", color: active ? "#4ADE80" : "rgba(74,222,128,0.85)", lineHeight: 1 }}>₹500 OFF</span>
                     )}
                   </button>
