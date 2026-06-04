@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { SparklesCore } from "@/app/_components/SparklesCore";
 import OTPModal from "../_components/OTPModal";
 import HealthifyCard from "../_components/HealthifyCard";
+import { useAuth } from "@/context/AuthContext";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -1001,6 +1003,18 @@ function EquipmentMarqueeSection() {
 export default function ServicesPage() {
   const [activeCategory, setActiveCategory] = useState<Category>("All");
   const [otpOpen, setOtpOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  const handleBook = () => {
+    if (isAuthenticated) {
+      // Already logged in — go straight to booking
+      router.push("/memberships#booking-section");
+    } else {
+      // Not logged in — verify first
+      handleBook();
+    }
+  };
 
   const filtered =
     activeCategory === "All"
@@ -1099,7 +1113,7 @@ export default function ServicesPage() {
           style={{ position: "relative", zIndex: 20, display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap" }}
         >
           <button
-            onClick={() => setOtpOpen(true)}
+            onClick={() => handleBook()}
             className="rsp-svc-hero-btn"
             style={{
               fontFamily: "var(--font-display)",
@@ -1283,7 +1297,7 @@ export default function ServicesPage() {
                   key={service.id}
                   service={service}
                   index={i}
-                  onBook={() => setOtpOpen(true)}
+                  onBook={() => handleBook()}
                 />
               ))}
             </motion.div>
@@ -1340,7 +1354,7 @@ export default function ServicesPage() {
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.7, delay: 0.3, ease: EASE }}
             style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, flexWrap: "wrap" }}>
             <motion.button
-              onClick={() => setOtpOpen(true)}
+              onClick={() => handleBook()}
               whileHover={{ scale: 1.04, boxShadow: "0 8px 40px rgba(255,130,0,0.5)" }}
               whileTap={{ scale: 0.97 }}
               style={{ padding: "18px 44px", background: "#FF8200", border: "none", borderRadius: 8, fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "#080808", cursor: "pointer", display: "flex", alignItems: "center", gap: 10 }}
