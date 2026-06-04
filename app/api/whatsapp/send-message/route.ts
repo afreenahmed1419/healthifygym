@@ -1,17 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-const BACKEND = process.env.BACKEND_URL ?? "http://localhost:5000";
-
-export async function POST(req: NextRequest) {
-  const auth = req.headers.get("Authorization") ?? "";
-  const body = await req.text();
-
-  const res = await fetch(`${BACKEND}/api/whatsapp/incoming`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: auth },
-    body,
-  });
-
-  const text = await res.text();
-  return new NextResponse(text, { status: res.status });
+// This endpoint is no longer used — WhatsApp notifications are handled
+// directly via Fast2SMS in lib/msg91.ts and verify-otp/route.ts
+export async function POST() {
+  return NextResponse.json({ success: false, message: "Endpoint deprecated." }, { status: 410 });
 }
