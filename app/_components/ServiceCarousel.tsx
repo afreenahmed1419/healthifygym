@@ -658,7 +658,7 @@ export default function ServiceCarousel() {
   useEffect(() => {
     const id = setInterval(
       () => setCurrent((p) => (p + 1) % SERVICES.length),
-      7000
+      10000
     );
     return () => clearInterval(id);
   }, []);
