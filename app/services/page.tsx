@@ -742,6 +742,52 @@ const MARQUEE_HALF_W = 10 * 260 + 9 * 16;
 
 function GymEquipmentMarqueeSection() {
   const trackW = EQUIP_MARQUEE_HALF_W + 16;
+  const trackRef = useRef<HTMLDivElement>(null);
+  const DURATION = 32;
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    let dragging = false, startX = 0, startTX = 0;
+    const getTX = () => new DOMMatrix(getComputedStyle(track).transform).m41;
+    const onStart = (clientX: number) => {
+      dragging = true; startX = clientX; startTX = getTX();
+      track.style.animation = "none";
+      track.style.transform = `translateX(${startTX}px)`;
+      track.style.cursor = "grabbing";
+    };
+    const onMove = (clientX: number) => {
+      if (!dragging) return;
+      track.style.transform = `translateX(${startTX + clientX - startX}px)`;
+    };
+    const onEnd = () => {
+      if (!dragging) return; dragging = false;
+      const tx = getTX();
+      const progress = ((-tx % trackW) + trackW) % trackW / trackW;
+      track.style.transform = "";
+      track.style.animation = `equip-scroll ${DURATION}s linear infinite`;
+      track.style.animationDelay = `${-(progress * DURATION)}s`;
+      track.style.cursor = "grab";
+    };
+    const md = (e: MouseEvent) => { e.preventDefault(); onStart(e.clientX); };
+    const mm = (e: MouseEvent) => onMove(e.clientX);
+    const ts = (e: TouchEvent) => onStart(e.touches[0].clientX);
+    const tm = (e: TouchEvent) => { e.preventDefault(); onMove(e.touches[0].clientX); };
+    track.addEventListener("mousedown", md);
+    window.addEventListener("mousemove", mm);
+    window.addEventListener("mouseup", onEnd);
+    track.addEventListener("touchstart", ts, { passive: true });
+    track.addEventListener("touchmove", tm, { passive: false });
+    window.addEventListener("touchend", onEnd);
+    return () => {
+      track.removeEventListener("mousedown", md);
+      window.removeEventListener("mousemove", mm);
+      window.removeEventListener("mouseup", onEnd);
+      track.removeEventListener("touchstart", ts);
+      track.removeEventListener("touchmove", tm);
+      window.removeEventListener("touchend", onEnd);
+    };
+  }, [trackW]);
 
   return (
     <section style={{ padding: "120px 0 120px", position: "relative", zIndex: 1 }}>
@@ -756,8 +802,9 @@ function GymEquipmentMarqueeSection() {
           width: max-content;
           will-change: transform;
           animation: equip-scroll 32s linear infinite;
+          cursor: grab;
+          user-select: none;
         }
-        .equip-track:hover { animation-play-state: paused; }
       `}</style>
 
       <motion.div
@@ -785,7 +832,7 @@ function GymEquipmentMarqueeSection() {
         <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 140, background: "linear-gradient(to right, #0d0d0d, transparent)", zIndex: 2, pointerEvents: "none" }} />
         <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 140, background: "linear-gradient(to left, #0d0d0d, transparent)", zIndex: 2, pointerEvents: "none" }} />
 
-        <div className="equip-track">
+        <div className="equip-track" ref={trackRef}>
           {[...EQUIPMENT_IMAGES, ...EQUIPMENT_IMAGES].map((src, i) => (
             <div
               key={i}
@@ -819,7 +866,53 @@ function GymEquipmentMarqueeSection() {
 }
 
 function EquipmentMarqueeSection() {
-  const trackW = MARQUEE_HALF_W + 16; // one full set including trailing gap
+  const trackW = MARQUEE_HALF_W + 16;
+  const trackRef = useRef<HTMLDivElement>(null);
+  const DURATION = 28;
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    let dragging = false, startX = 0, startTX = 0;
+    const getTX = () => new DOMMatrix(getComputedStyle(track).transform).m41;
+    const onStart = (clientX: number) => {
+      dragging = true; startX = clientX; startTX = getTX();
+      track.style.animation = "none";
+      track.style.transform = `translateX(${startTX}px)`;
+      track.style.cursor = "grabbing";
+    };
+    const onMove = (clientX: number) => {
+      if (!dragging) return;
+      track.style.transform = `translateX(${startTX + clientX - startX}px)`;
+    };
+    const onEnd = () => {
+      if (!dragging) return; dragging = false;
+      const tx = getTX();
+      const progress = ((-tx % trackW) + trackW) % trackW / trackW;
+      track.style.transform = "";
+      track.style.animation = `products-scroll ${DURATION}s linear infinite`;
+      track.style.animationDelay = `${-(progress * DURATION)}s`;
+      track.style.cursor = "grab";
+    };
+    const md = (e: MouseEvent) => { e.preventDefault(); onStart(e.clientX); };
+    const mm = (e: MouseEvent) => onMove(e.clientX);
+    const ts = (e: TouchEvent) => onStart(e.touches[0].clientX);
+    const tm = (e: TouchEvent) => { e.preventDefault(); onMove(e.touches[0].clientX); };
+    track.addEventListener("mousedown", md);
+    window.addEventListener("mousemove", mm);
+    window.addEventListener("mouseup", onEnd);
+    track.addEventListener("touchstart", ts, { passive: true });
+    track.addEventListener("touchmove", tm, { passive: false });
+    window.addEventListener("touchend", onEnd);
+    return () => {
+      track.removeEventListener("mousedown", md);
+      window.removeEventListener("mousemove", mm);
+      window.removeEventListener("mouseup", onEnd);
+      track.removeEventListener("touchstart", ts);
+      track.removeEventListener("touchmove", tm);
+      window.removeEventListener("touchend", onEnd);
+    };
+  }, [trackW]);
 
   return (
     <section style={{ padding: "120px 0 120px", position: "relative", zIndex: 1 }}>
@@ -834,8 +927,9 @@ function EquipmentMarqueeSection() {
           width: max-content;
           will-change: transform;
           animation: products-scroll 28s linear infinite;
+          cursor: grab;
+          user-select: none;
         }
-        .products-track:hover { animation-play-state: paused; }
       `}</style>
 
       {/* Header */}
@@ -866,7 +960,7 @@ function EquipmentMarqueeSection() {
         <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 140, background: "linear-gradient(to right, #0d0d0d, transparent)", zIndex: 2, pointerEvents: "none" }} />
         <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 140, background: "linear-gradient(to left, #0d0d0d, transparent)", zIndex: 2, pointerEvents: "none" }} />
 
-        <div className="products-track">
+        <div className="products-track" ref={trackRef}>
           {[...MEMBER_PRODUCTS, ...MEMBER_PRODUCTS].map((product, i) => (
             <div
               key={i}
