@@ -10,16 +10,22 @@ async function notifyOwnerOnSignup(userPhone: string): Promise<void> {
   const ownerNumber = process.env.OWNER_WHATSAPP_NUMBER;
   if (!apiKey || !ownerNumber) { console.log(`[Owner Notify] New signup: ${userPhone}`); return; }
 
-  const ownerDigits = ownerNumber.replace(/^\+/, "").replace(/\D/g, "");
+  const ownerDigits = ownerNumber.replace(/^\+/, "").replace(/\D/g, "").slice(-10);
   const ist = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata", hour12: true });
-  const message = `🎉 NEW MEMBER SIGNUP\n\nPhone: ${userPhone}\nTime: ${ist}\n\n— Healthify Women's Fitness Club`;
+
+  // Use approved Fast2SMS template: healthify_new_signup (message_id: 22279)
+  const params = new URLSearchParams({
+    authorization: apiKey,
+    message_id: "22279",
+    phone_number_id: "1116898334844898",
+    numbers: ownerDigits,
+    variables_values: `${userPhone}|${ist}`,
+  });
 
   try {
-    await fetch("https://www.fast2sms.com/dev/wa-group", {
-      method: "POST",
-      headers: { authorization: apiKey, "Content-Type": "application/json" },
-      body: JSON.stringify({ message, numbers: ownerDigits }),
-    });
+    const res = await fetch(`https://www.fast2sms.com/dev/whatsapp?${params.toString()}`);
+    const data = await res.json() as { status?: boolean };
+    if (!data.status) console.error("[Owner Notify] Template send failed:", JSON.stringify(data));
   } catch (err) { console.error("[Owner Notify] Failed:", err); }
 }
 
