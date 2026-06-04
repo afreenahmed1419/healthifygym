@@ -13,7 +13,7 @@ export interface JWTPayload {
   exp?: number;
 }
 
-export function generateJWT(userId: string, whatsappNumber: string, expiresIn = "30d"): string {
+export function generateJWT(userId: string, whatsappNumber: string, expiresIn = "72h"): string {
   return jwt.sign({ userId, whatsappNumber }, getSecret(), { expiresIn } as jwt.SignOptions);
 }
 
