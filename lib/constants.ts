@@ -8,7 +8,7 @@ export const BRAND = {
   slogan: "Strength Is Her Power",
   phone: "+91 94742 87111",
   email: "hello@healthify.com",
-  address: "Opposite Petrol Pump, Delanipur, Sri Vijaya Puram, Port Blair",
+  address: "Opposite Petrol Pump, Delanipur, Sri Vijaya Puram",
   instagram: "https://instagram.com/healthify",
   facebook: "https://facebook.com/healthify",
   youtube: "https://youtube.com/healthify",
@@ -176,7 +176,7 @@ export const BRANCHES: Branch[] = [
     id: "branch-delanipur",
     name: "Healthify — Delanipur",
     address: "Opposite Petrol Pump, Delanipur, Sri Vijaya Puram",
-    city: "Port Blair, Andaman & Nicobar Islands 744102",
+    city: "Sri Vijaya Puram, Andaman & Nicobar Islands 744102",
     hours: {
       weekdays: "5:00 AM – 8:00 PM",
       sunday: "5:00 AM – 8:00 PM",
@@ -188,7 +188,7 @@ export const BRANCHES: Branch[] = [
     id: "branch-bambooflat",
     name: "Healthify — Bambooflat",
     address: "Opposite GSSS Bambooflat School, Valluvar Nagar, Sri Vijaya Puram",
-    city: "Port Blair, Andaman & Nicobar Islands",
+    city: "Sri Vijaya Puram, Andaman & Nicobar Islands",
     hours: {
       weekdays: "6:00 AM – 7:00 PM",
       sunday: "6:00 AM – 7:00 PM",
