@@ -23,7 +23,7 @@ async function notifyOwnerOnSignup(userPhone: string): Promise<void> {
   });
 
   try {
-    const res = await fetch(`https://www.fast2sms.com/dev/whatsapp?${params.toString()}`);
+    const res = await fetch(`https://www.fast2sms.com/dev/whatsapp?${params.toString()}`, { method: "GET" });
     const data = await res.json() as { status?: boolean };
     if (!data.status) console.error("[Owner Notify] Template send failed:", JSON.stringify(data));
   } catch (err) { console.error("[Owner Notify] Failed:", err); }
