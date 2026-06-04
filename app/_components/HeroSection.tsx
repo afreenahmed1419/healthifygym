@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import HeroParticles from "./HeroParticles";
@@ -29,6 +30,7 @@ function frameToStage(frame: number) {
 }
 
 export default function HeroSection() {
+  const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
 
@@ -830,8 +832,8 @@ export default function HeroSection() {
             </p>
             {stage.showCtas && (
               <div className="hr-ctas text-in" style={{ animationDelay: "250ms" }}>
-                <button className="btn-p">JOIN NOW →</button>
-                <button className="btn-s">EXPLORE PROGRAMS</button>
+                <button className="btn-p" onClick={() => router.push("/memberships")}>JOIN NOW →</button>
+                <button className="btn-s" onClick={() => router.push("/services")}>EXPLORE PROGRAMS</button>
               </div>
             )}
           </div>
