@@ -102,7 +102,7 @@ async function confirmPayment(
       if (notes.whatsapp) userWhatsapp = notes.whatsapp;
     } catch { /* use default */ }
 
-    Promise.allSettled([
+    await Promise.allSettled([
       sendOwnerBookingNotification({
         userName: userData.name,
         userPhone: userData.whatsapp_number,
@@ -118,9 +118,8 @@ async function confirmPayment(
         time: booking.booking_time,
         bookingId: booking.id,
       }),
-    ]).then(() =>
-      db.from("bookings").update({ owner_notified: true }).eq("id", booking.id)
-    ).catch(console.error);
+    ]);
+    await db.from("bookings").update({ owner_notified: true }).eq("id", booking.id);
   }
 
   return booking;
