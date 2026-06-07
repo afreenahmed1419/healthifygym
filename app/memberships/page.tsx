@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import apiClient from "@/lib/api-client";
 import { openRazorpayCheckout } from "@/lib/razorpay";
+import { validatePhoneNumber } from "@/lib/auth";
 import HealthifyCard from "../_components/HealthifyCard";
 
 // ─── Hex grid SVG background ──────────────────────────────────────────────────
@@ -496,7 +497,9 @@ function BookingSection({ selectedPlan, onChangePlan }: { selectedPlan: string; 
     if (!bName.trim()) errs.name = "Name is required";
     if (!bEmail.trim()) errs.email = "Email is required";
     if (!bPhone.trim()) errs.phone = "Phone is required";
+    else if (!validatePhoneNumber(bPhone)) errs.phone = "Enter a valid 10-digit Indian mobile number";
     if (!bWhatsapp.trim()) errs.whatsapp = "WhatsApp number is required";
+    else if (!validatePhoneNumber(bWhatsapp)) errs.whatsapp = "Enter a valid 10-digit Indian mobile number";
     setBErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
@@ -542,6 +545,7 @@ function BookingSection({ selectedPlan, onChangePlan }: { selectedPlan: string; 
     const errs: Record<string, string> = {};
     if (!vName.trim()) errs.name = "Name is required";
     if (!vPhone.trim()) errs.phone = "Phone is required";
+    else if (!validatePhoneNumber(vPhone)) errs.phone = "Enter a valid 10-digit Indian mobile number";
     setVErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
