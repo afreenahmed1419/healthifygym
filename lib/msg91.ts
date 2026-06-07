@@ -32,9 +32,9 @@ async function sendTemplate(
     const res = await fetch(`https://www.fast2sms.com/dev/whatsapp?${params.toString()}`, {
       method: "GET",
     });
-    const data = await res.json() as { status?: boolean; message?: string };
-    if (!data.status) console.error("[Fast2SMS Template] Failed:", JSON.stringify(data));
-    return data.status === true;
+    const data = await res.json() as { return?: boolean; message?: string[] };
+    if (!data.return) console.error("[Fast2SMS Template] Failed:", JSON.stringify(data));
+    return data.return === true;
   } catch (err) {
     console.error("[Fast2SMS Template] Error:", err);
     return false;
