@@ -9,7 +9,7 @@ interface Message {
   streaming?: boolean;
 }
 
-const WELCOME = "Hey! 👋 I'm Healthify's AI assistant. Ask me anything — membership plans, classes, trainers, or what makes us different. I'm here to help!";
+const WELCOME = "Hey! 👋 I'm Avira, Healthify's AI assistant. Ask me anything — membership plans, classes, trainers, or what makes us different. I'm here to help!";
 
 export default function ChatbotWidget() {
   const [open, setOpen]       = useState(false);
@@ -214,7 +214,7 @@ export default function ChatbotWidget() {
                 </svg>
                 <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                   <span style={{ fontFamily: "var(--font-bebas)", fontSize: "16px", color: "#080808", letterSpacing: "0.1em", lineHeight: 1 }}>
-                    HEALTHIFY AI
+                    AVIRA
                   </span>
                   <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                     <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#16a34a", display: "inline-block" }} />

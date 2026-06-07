@@ -213,7 +213,7 @@ export default function Footer() {
                 textTransform: "uppercase",
                 transition: "color 0.2s",
               }}>
-                AI ASSISTANT — CHAT NOW
+                CHAT WITH AVIRA
               </span>
             </button>
           </div>
