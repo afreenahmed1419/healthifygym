@@ -129,15 +129,6 @@ export interface ClassOption {
   duration: string;
 }
 
-export interface BookingFormData {
-  classId: string;
-  date: string;
-  time: string;
-  name: string;
-  whatsappNumber: string;
-  email: string;
-}
-
 // ─── Contact ────────────────────────────────────────────────────────────────
 
 export interface ContactFormData {

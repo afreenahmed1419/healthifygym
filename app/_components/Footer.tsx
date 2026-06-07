@@ -13,12 +13,12 @@ const QUICK_LINKS = [
 ];
 
 const SERVICE_LINKS = [
-  { label: "Strength Training", href: "/services#strength" },
-  { label: "Zumba & Aerobics", href: "/services#zumba" },
-  { label: "Nutritional Guidance", href: "/services#nutrition" },
-  { label: "Personal Training", href: "/services#personal" },
-  { label: "Women Wellness", href: "/services#wellness" },
-  { label: "Yoga", href: "/services#yoga" },
+  { label: "Strength Training", href: "/services#strength-training" },
+  { label: "Zumba & Aerobics", href: "/services#zumba-aerobics" },
+  { label: "Nutritional Guidance", href: "/services#nutritional-guidance" },
+  { label: "Personal Training", href: "/services#personal-training" },
+  { label: "Women Wellness", href: "/services#women-wellness" },
+  { label: "Yoga", href: "/services#yoga-strength" },
 ];
 
 

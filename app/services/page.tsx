@@ -411,6 +411,7 @@ function ServiceCard({ service, index, onBook }: { service: Service; index: numb
 
   return (
     <motion.div
+      id={service.id}
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.55, delay: (index % 3) * 0.08, ease: EASE }}

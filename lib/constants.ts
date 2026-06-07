@@ -198,17 +198,6 @@ export const BRANCHES: Branch[] = [
   },
 ];
 
-// ─── API Routes ──────────────────────────────────────────────────────────────
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL?.trim() || "";
-
-export const API_ROUTES = {
-  sendOTP: `${API_BASE_URL}/api/auth/send-otp`,
-  verifyOTP: `${API_BASE_URL}/api/auth/verify-otp`,
-  contact: `${API_BASE_URL}/api/contact`,
-  booking: `${API_BASE_URL}/api/booking`,
-} as const;
-
 // ─── Real Membership Pricing (from client) ───────────────────────────────────
 
 export const LIFETIME_PLAN = {

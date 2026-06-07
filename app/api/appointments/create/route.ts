@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase";
 import { requireAuth } from "@/lib/api-auth";
-import { sanitizeString } from "@/lib/sanitize";
+import { sanitizeString, sanitizePhone } from "@/lib/sanitize";
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,7 +9,9 @@ export async function POST(req: NextRequest) {
     if ("error" in authResult) return authResult.error;
     const { user } = authResult;
 
-    const raw = await req.json() as { message?: string };
+    const raw = await req.json() as { name?: string; phone?: string; message?: string };
+    const name = raw.name ? sanitizeString(raw.name) : undefined;
+    const phone = raw.phone ? sanitizePhone(raw.phone) : undefined;
     const message = raw.message ? sanitizeString(raw.message) : undefined;
 
     const db = getAdminClient();
@@ -17,10 +19,13 @@ export async function POST(req: NextRequest) {
     const { data: userData } = await db.from("users").select("*").eq("id", user.userId).single();
     if (!userData) return NextResponse.json({ success: false, message: "User not found." }, { status: 404 });
 
+    const fullName = name || userData.name || null;
+    const whatsappNumber = phone || userData.whatsapp_number;
+
     const { data: appointment, error } = await db.from("appointments").insert({
       user_id: user.userId,
-      full_name: userData.name ?? null,
-      whatsapp_number: userData.whatsapp_number,
+      full_name: fullName,
+      whatsapp_number: whatsappNumber,
       message: message ?? null,
       whatsapp_link_sent: false,
       owner_response_status: "pending",
@@ -31,7 +36,7 @@ export async function POST(req: NextRequest) {
     }
 
     const ownerPhone = (process.env.OWNER_WHATSAPP_NUMBER ?? "").replace(/\D/g, "");
-    const text = `Hi! I'd like to visit Healthify gym. When are you available? - ${userData.name ?? userData.whatsapp_number}`;
+    const text = `Hi! I'd like to visit Healthify gym. When are you available? - ${fullName ?? whatsappNumber}`;
     const whatsappLink = `https://wa.me/${ownerPhone}?text=${encodeURIComponent(text)}`;
 
     return NextResponse.json({

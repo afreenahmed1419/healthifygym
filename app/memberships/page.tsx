@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import apiClient from "@/lib/api-client";
+import { openRazorpayCheckout } from "@/lib/razorpay";
 import HealthifyCard from "../_components/HealthifyCard";
 
 // ─── Hex grid SVG background ──────────────────────────────────────────────────
@@ -506,22 +507,23 @@ function BookingSection({ selectedPlan, onChangePlan }: { selectedPlan: string; 
         goal: bGoal,
       });
       const { razorpayOrder } = res.data;
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+
+      await openRazorpayCheckout({
+        orderId: razorpayOrder.id,
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency,
-        order_id: razorpayOrder.id,
-        name: "Healthify Women's Fitness Club",
         description: selectedPlan,
-        handler: async (response: Record<string, string>) => {
-          await apiClient.post("/api/payments/verify", response);
+        prefill: { name: bName, email: bEmail, contact: bPhone },
+        onSuccess: async (response) => {
+          await apiClient.post("/api/payments/verify", {
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+          });
           setBSuccess(true);
         },
-        prefill: { name: bName, email: bEmail, contact: bPhone },
-        theme: { color: "#FF8200" },
-      };
-      const rzp = new (window as unknown as { Razorpay: new (o: unknown) => { open: () => void } }).Razorpay(options);
-      rzp.open();
+        onDismiss: () => setBError("Payment cancelled."),
+      });
     } catch (err: unknown) {
       setBError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
