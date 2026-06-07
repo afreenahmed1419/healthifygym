@@ -433,6 +433,13 @@ function parseSlotMinutes(slot: string): number {
   return hours * 60 + m;
 }
 
+function to24HourTime(slot: string): string {
+  const totalMinutes = parseSlotMinutes(slot);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
 function isSlotPassed(slot: string, dateStr: string): boolean {
   const today = new Date().toISOString().split("T")[0];
   if (dateStr !== today) return false;
@@ -499,7 +506,7 @@ function BookingSection({ selectedPlan, onChangePlan }: { selectedPlan: string; 
       const res = await apiClient.post("/api/bookings/create", {
         serviceName: selectedPlan,
         bookingDate: selectedDay,
-        bookingTime: selectedTime,
+        bookingTime: to24HourTime(selectedTime),
         userName: bName,
         email: bEmail,
         phone: bPhone,
