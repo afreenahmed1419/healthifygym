@@ -6,6 +6,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import Navbar from "./_components/Navbar";
 import Footer from "./_components/Footer";
 import PageTransition from "./_components/PageTransition";
+import StructuredData from "./_components/StructuredData";
 
 const ChatbotWidget = dynamic(() => import("./_components/ChatbotWidget"));
 
@@ -34,15 +35,53 @@ const barlow = Barlow({
   style: ["normal", "italic"],
 });
 
+const SITE_URL = "https://www.healthifygym.in";
+const DEFAULT_DESCRIPTION =
+  "Healthify is a women-only fitness gym in Sri Vijaya Puram (Port Blair), Andaman & Nicobar Islands — strength training, group classes & coaching for ages 14 to 65.";
+
 export const metadata: Metadata = {
-  title: "Healthify — Exclusive Ladies Fitness Club",
-  description:
-    "Empowering women from 14 to 65 to build strength, confidence and a healthier, unstoppable tomorrow.",
-  keywords: ["women fitness", "ladies gym", "healthify", "strength training", "women wellness", "India"],
+  metadataBase: new URL(SITE_URL),
+  title: {
+    template: "%s | Healthify Sri Vijaya Puram",
+    default: "Healthify | Women's Fitness Gym in Sri Vijaya Puram (Port Blair)",
+  },
+  description: DEFAULT_DESCRIPTION,
+  keywords: [
+    "Healthify",
+    "women's gym Port Blair",
+    "ladies gym Port Blair",
+    "women's gym Sri Vijaya Puram",
+    "ladies gym Sri Vijaya Puram",
+    "women's fitness gym Sri Vijaya Puram",
+    "best women's fitness club Andaman",
+    "women only fitness club",
+    "strength training",
+    "Andaman & Nicobar Islands",
+  ],
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "Healthify — Exclusive Ladies Fitness Club",
-    description: "Strength Is Her Power. Join 2500+ women transforming their lives.",
+    title: "Healthify | Women's Fitness Gym in Sri Vijaya Puram (Port Blair)",
+    description: DEFAULT_DESCRIPTION,
+    url: SITE_URL,
+    siteName: "Healthify",
+    locale: "en_IN",
     type: "website",
+    images: [
+      {
+        url: "/logo.jpg",
+        width: 1600,
+        height: 800,
+        alt: "Healthify — Women's Fitness Gym in Sri Vijaya Puram, Andaman & Nicobar Islands",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Healthify | Women's Fitness Gym in Sri Vijaya Puram (Port Blair)",
+    description: DEFAULT_DESCRIPTION,
+    images: ["/logo.jpg"],
   },
 };
 
@@ -50,6 +89,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${geistSans.variable} ${bebasNeue.variable} ${barlowCondensed.variable} ${barlow.variable}`}>
       <body className="bg-[#0d0d0d] text-white antialiased">
+        <StructuredData />
         <AuthProvider>
           <Navbar />
           <PageTransition>{children}</PageTransition>

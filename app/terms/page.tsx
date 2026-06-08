@@ -21,7 +21,7 @@ export default function TermsPage() {
             TERMS &amp; CONDITIONS
           </h1>
           <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", fontWeight: 300, color: "rgba(245,240,235,0.35)" }}>
-            Effective date: 1 June 2025 &nbsp;·&nbsp; Healthify Women&apos;s Fitness Club, Port Blair
+            Effective date: 1 June 2025 &nbsp;·&nbsp; Healthify Women&apos;s Fitness Club, Sri Vijaya Puram
           </p>
         </div>
 
@@ -94,7 +94,7 @@ export default function TermsPage() {
 
           <Section title="Governing Law">
             These Terms are governed by and construed in accordance with the laws of India. Any disputes
-            arising shall be subject to the exclusive jurisdiction of the courts in Port Blair, Andaman
+            arising shall be subject to the exclusive jurisdiction of the courts in Sri Vijaya Puram (Port Blair), Andaman
             &amp; Nicobar Islands.
           </Section>
 
@@ -102,7 +102,7 @@ export default function TermsPage() {
             <div style={{ background: "rgba(255,130,0,0.04)", border: "1px solid rgba(255,130,0,0.12)", padding: "16px 20px", borderRadius: "6px" }}>
               <div style={{ fontFamily: "var(--font-display)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.15em", color: "#FF8200", marginBottom: "10px" }}>HEALTHIFY WOMEN&apos;S FITNESS CLUB</div>
               <div style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", fontWeight: 300, color: "rgba(245,240,235,0.5)", lineHeight: 1.7 }}>
-                Port Blair, Andaman &amp; Nicobar Islands, India<br />
+                Sri Vijaya Puram, Andaman &amp; Nicobar Islands, India<br />
                 WhatsApp / Phone: +91 94742 87111
               </div>
             </div>

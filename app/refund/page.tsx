@@ -21,7 +21,7 @@ export default function RefundPage() {
             REFUND &amp; CANCELLATION POLICY
           </h1>
           <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", fontWeight: 300, color: "rgba(245,240,235,0.35)" }}>
-            Effective date: 1 June 2025 &nbsp;·&nbsp; Healthify Women&apos;s Fitness Club, Port Blair
+            Effective date: 1 June 2025 &nbsp;·&nbsp; Healthify Women&apos;s Fitness Club, Sri Vijaya Puram
           </p>
         </div>
 

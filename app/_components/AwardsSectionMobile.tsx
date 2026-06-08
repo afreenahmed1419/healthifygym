@@ -34,7 +34,7 @@ export default function AwardsSectionMobile() {
             <div style={{ width: "130px" }}>
               <div style={{ border: "2px solid rgba(255,150,0,0.4)", borderRadius: "8px 8px 0 0", overflow: "hidden" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/aurshia.png" alt="Aurshia Tahir"
+                <img src="/images/aurshia.png" alt="Aurshia Tahir, founder of Healthify women’s fitness club in Sri Vijaya Puram"
                   style={{ width: "100%", height: "160px", objectFit: "cover", objectPosition: "top center", display: "block" }} />
               </div>
               <div style={{ background: "#FF8200", padding: "7px 10px", textAlign: "center", borderRadius: "0 0 8px 8px" }}>

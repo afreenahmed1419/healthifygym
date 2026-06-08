@@ -40,7 +40,7 @@ function ImgCard({ src, index, tall = false }: { src: string; index: number; tal
     >
       <Image
         src={src}
-        alt={`Community member ${index + 1}`}
+        alt={`Healthify community member ${index + 1} training at our women’s gym in Sri Vijaya Puram`}
         fill
         sizes="300px"
         style={{

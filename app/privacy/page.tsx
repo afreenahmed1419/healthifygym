@@ -23,7 +23,7 @@ export default function PrivacyPage() {
             PRIVACY POLICY
           </h1>
           <p style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", fontWeight: 300, color: "rgba(245,240,235,0.35)" }}>
-            Effective date: 1 June 2025 &nbsp;·&nbsp; Healthify Women&apos;s Fitness Club, Port Blair
+            Effective date: 1 June 2025 &nbsp;·&nbsp; Healthify Women&apos;s Fitness Club, Sri Vijaya Puram
           </p>
         </div>
 
@@ -31,7 +31,7 @@ export default function PrivacyPage() {
 
           <Section title="Who We Are">
             Healthify Women&apos;s Fitness Club (&quot;Healthify&quot;, &quot;we&quot;, &quot;our&quot;) is a women-only fitness facility
-            operating in Port Blair, Andaman &amp; Nicobar Islands, India. This policy explains how we handle
+            operating in Sri Vijaya Puram (Port Blair), Andaman &amp; Nicobar Islands, India. This policy explains how we handle
             personal information collected through our website, booking forms, and membership process.
           </Section>
 
@@ -99,7 +99,7 @@ export default function PrivacyPage() {
                 Healthify Women&apos;s Fitness Club
               </div>
               <div style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", fontWeight: 300, color: "rgba(245,240,235,0.5)", lineHeight: 1.7 }}>
-                Port Blair, Andaman &amp; Nicobar Islands, India<br />
+                Sri Vijaya Puram, Andaman &amp; Nicobar Islands, India<br />
                 WhatsApp / Phone: +91 94742 87111
               </div>
             </div>

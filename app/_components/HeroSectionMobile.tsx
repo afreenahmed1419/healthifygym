@@ -115,10 +115,10 @@ export default function HeroSectionMobile() {
             <div style={{ width: "22px", height: "1px", background: "#FF8200" }} />
           </div>
 
-          <h1 style={{ fontFamily: "var(--font-bebas)", lineHeight: 0.92, margin: 0 }}>
+          <div style={{ fontFamily: "var(--font-bebas)", lineHeight: 0.92, margin: 0 }}>
             <span style={{ display: "block", fontSize: "clamp(2.6rem, 14vw, 3.4rem)", color: "#fff", textShadow: "0 0 20px rgba(0,0,0,0.9), 0 2px 16px rgba(0,0,0,0.8)" }}>LIFT. SWEAT.</span>
             <span style={{ display: "block", fontSize: "clamp(2.6rem, 14vw, 3.4rem)", color: "#FF8200", textShadow: "0 0 30px rgba(255,130,0,0.95), 0 0 60px rgba(255,130,0,0.5), 0 2px 8px rgba(0,0,0,0.8)" }}>CONQUER.</span>
-          </h1>
+          </div>
 
           <p style={{ fontFamily: "var(--font-body)", fontSize: "0.75rem", fontWeight: 300, color: "rgba(255,255,255,0.9)", lineHeight: 1.7, maxWidth: "240px", margin: "12px auto", textShadow: "0 1px 10px rgba(0,0,0,0.95)" }}>
             Empowering women from 14 to 65 to build strength and confidence.
