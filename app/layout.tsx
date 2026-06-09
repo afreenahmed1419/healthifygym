@@ -83,6 +83,15 @@ export const metadata: Metadata = {
     description: DEFAULT_DESCRIPTION,
     images: ["/logo.jpg"],
   },
+  icons: {
+    icon: [
+      { url: "/logo.png", type: "image/png" },
+    ],
+    apple: [
+      { url: "/logo.png" },
+    ],
+    shortcut: "/logo.png",
+  },
   verification: {
     google: "D8_DPKn2z-fwWbtQyrS10ycITt0u6QuTT5UHasPcEu8",
   },
