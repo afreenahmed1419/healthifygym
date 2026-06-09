@@ -500,11 +500,14 @@ export default function ContactClient() {
               </div>
               <div style={{ display: "flex", gap: "12px" }}>
                 {[
-                  { label: "Instagram", icon: <IconInstagram /> },
-                  { label: "Facebook", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg> },
-                ].map(({ label, icon }) => (
-                  <motion.button
+                  { label: "Instagram", icon: <IconInstagram />, href: "https://www.instagram.com/healthifyportblair/" },
+                  { label: "Facebook",  icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>, href: "https://www.facebook.com/profile.php?id=100090896265271" },
+                ].map(({ label, icon, href }) => (
+                  <motion.a
                     key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     whileHover={{ y: -3 }}
                     style={{
                       display: "flex",
@@ -521,11 +524,12 @@ export default function ContactClient() {
                       cursor: "pointer",
                       borderRadius: "6px",
                       transition: "all 0.2s",
+                      textDecoration: "none",
                     }}
                   >
                     {icon}
                     {label.toUpperCase()}
-                  </motion.button>
+                  </motion.a>
                 ))}
               </div>
             </motion.div>
