@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import apiClient from "@/lib/api-client";
 import { openRazorpayCheckout } from "@/lib/razorpay";
 import { validatePhoneNumber } from "@/lib/auth";
@@ -120,6 +120,115 @@ const COMBO_ROWS = [
   { type: "HALF YEARLY", price: 17500, benefit: "₹2,500 discount + 01 WEEK PT" },
   { type: "YEARLY",      price: 30000, benefit: "₹6,000 discount + 15 DAYS PT" },
 ];
+
+
+// ─── Duration picker ──────────────────────────────────────────────────────────
+
+type DurationOption = { label: string; planName: string; price: string };
+const PLAN_DURATIONS: Record<string, { title: string; options: DurationOption[] }> = {
+  essential: {
+    title: "ESSENTIAL (STRENGTH)",
+    options: [
+      { label: "Monthly",          planName: "Essential (Strength) — Monthly",        price: "₹3,000"  },
+      { label: "Quarterly",        planName: "Essential (Strength) — Quarterly",      price: "₹6,000"  },
+      { label: "Half Yearly",      planName: "Essential (Strength) — Half Yearly",    price: "₹10,000" },
+      { label: "Yearly",           planName: "Essential (Strength) — Yearly",         price: "₹18,000" },
+      { label: "PT / Monthly",     planName: "Essential (Strength) — PT Monthly",     price: "₹5,500"  },
+      { label: "PT / Quarterly",   planName: "Essential (Strength) — PT Quarterly",   price: "₹15,000" },
+      { label: "PT / Half Yearly", planName: "Essential (Strength) — PT Half Yearly", price: "₹27,000" },
+    ],
+  },
+  yoga: {
+    title: "YOGA / AEROBICS / ZUMBA",
+    options: [
+      { label: "Monthly",     planName: "Yoga / Aerobics / Zumba — Monthly",     price: "₹3,000"  },
+      { label: "Quarterly",   planName: "Yoga / Aerobics / Zumba — Quarterly",   price: "₹6,000"  },
+      { label: "Half Yearly", planName: "Yoga / Aerobics / Zumba — Half Yearly", price: "₹10,000" },
+      { label: "Yearly",      planName: "Yoga / Aerobics / Zumba — Yearly",      price: "₹18,000" },
+    ],
+  },
+  combo: {
+    title: "STRENGTH + ZUMBA / AEROBICS",
+    options: [
+      { label: "Monthly",     planName: "Strength + Zumba / Aerobics (Combo) — Monthly",     price: "₹5,000"  },
+      { label: "Quarterly",   planName: "Strength + Zumba / Aerobics (Combo) — Quarterly",   price: "₹10,000" },
+      { label: "Half Yearly", planName: "Strength + Zumba / Aerobics (Combo) — Half Yearly", price: "₹17,500" },
+      { label: "Yearly",      planName: "Strength + Zumba / Aerobics (Combo) — Yearly",      price: "₹30,000" },
+    ],
+  },
+};
+
+function DurationModal({
+  planKey, onConfirm, onClose,
+}: {
+  planKey: string; onConfirm: (planName: string) => void; onClose: () => void;
+}) {
+  const plan = PLAN_DURATIONS[planKey];
+  const [selected, setSelected] = useState(plan.options[0].planName);
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.78)",
+        backdropFilter: "blur(4px)", display: "flex", alignItems: "center",
+        justifyContent: "center", padding: "20px" }}
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 28, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 14, scale: 0.97 }}
+        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+        style={{ background: "#111", border: "1px solid rgba(255,130,0,0.25)", borderRadius: "16px",
+          padding: "32px", width: "100%", maxWidth: "460px",
+          boxShadow: "0 32px 80px rgba(0,0,0,0.8)", maxHeight: "90vh", overflowY: "auto" as const }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "24px" }}>
+          <div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "10px", fontWeight: 600,
+              letterSpacing: "0.25em", color: "#FF8200", marginBottom: "6px" }}>SELECT DURATION</div>
+            <div style={{ fontFamily: "var(--font-bebas)", fontSize: "1.6rem", color: "#F5F0EB", lineHeight: 1 }}>{plan.title}</div>
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(245,240,235,0.4)",
+            cursor: "pointer", fontSize: "22px", lineHeight: 1, padding: "0 0 0 12px" }}>{"✕"}</button>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "28px" }}>
+          {plan.options.map((opt) => {
+            const active = selected === opt.planName;
+            return (
+              <div key={opt.planName} onClick={() => setSelected(opt.planName)} style={{
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                padding: "14px 18px", borderRadius: "10px", cursor: "pointer",
+                border: `1px solid ${active ? "#FF8200" : "rgba(255,130,0,0.12)"}`,
+                background: active ? "rgba(255,130,0,0.1)" : "rgba(255,255,255,0.02)",
+                transition: "border-color 0.18s, background 0.18s",
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <div style={{ width: "16px", height: "16px", borderRadius: "50%", flexShrink: 0,
+                    border: `2px solid ${active ? "#FF8200" : "rgba(255,130,0,0.3)"}`,
+                    background: active ? "#FF8200" : "transparent",
+                    transition: "border-color 0.18s, background 0.18s" }} />
+                  <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 600,
+                    letterSpacing: "0.06em", color: active ? "#F5F0EB" : "rgba(245,240,235,0.65)",
+                    textTransform: "uppercase" as const }}>{opt.label}</span>
+                </div>
+                <span style={{ fontFamily: "var(--font-bebas)", fontSize: "1.15rem",
+                  color: active ? "#FF8200" : "rgba(245,240,235,0.5)", letterSpacing: "0.04em" }}>{opt.price}</span>
+              </div>
+            );
+          })}
+        </div>
+        <button onClick={() => { onConfirm(selected); onClose(); }} style={{
+          width: "100%", padding: "15px", background: "#FF8200", color: "#080808",
+          fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700,
+          letterSpacing: "0.18em", textTransform: "uppercase" as const,
+          border: "none", borderRadius: "8px", cursor: "pointer" }}>
+          CONTINUE {"→"}
+        </button>
+      </motion.div>
+    </motion.div>
+  );
+}
 
 function inr(n: number) {
   return `₹${n.toLocaleString("en-IN")}`;
@@ -971,6 +1080,7 @@ function BookingSection({ selectedPlan, onChangePlan }: { selectedPlan: string; 
 
 export default function MembershipsClient() {
   const [selectedPlan, setSelectedPlan] = useState("Essential (Strength) — Monthly");
+  const [modalPlan, setModalPlan] = useState<string | null>(null);
 
   const selectPlan = (planName: string) => {
     setSelectedPlan(planName);
@@ -1063,7 +1173,7 @@ export default function MembershipsClient() {
             </HealthifyCard>
           </div>
           <div style={{ maxWidth: "740px", margin: "0 auto 48px" }}>
-            <PrimaryBtn onClick={() => selectPlan("Essential (Strength) — Monthly")}>CHOOSE ESSENTIAL →</PrimaryBtn>
+            <PrimaryBtn onClick={() => setModalPlan("essential")}>CHOOSE ESSENTIAL →</PrimaryBtn>
           </div>
         </FadeIn>
 
@@ -1078,7 +1188,7 @@ export default function MembershipsClient() {
             </HealthifyCard>
           </div>
           <div style={{ maxWidth: "740px", margin: "0 auto 48px" }}>
-            <PrimaryBtn onClick={() => selectPlan("Yoga / Aerobics / Zumba — Monthly")}>CHOOSE YOGA/ZUMBA →</PrimaryBtn>
+            <PrimaryBtn onClick={() => setModalPlan("yoga")}>CHOOSE YOGA/ZUMBA →</PrimaryBtn>
           </div>
         </FadeIn>
 
@@ -1098,7 +1208,7 @@ export default function MembershipsClient() {
             </HealthifyCard>
           </div>
           <div style={{ maxWidth: "900px", margin: "0 auto 48px" }}>
-            <PrimaryBtn onClick={() => selectPlan("Strength + Zumba / Aerobics (Combo) — Monthly")}>CHOOSE COMBO →</PrimaryBtn>
+            <PrimaryBtn onClick={() => setModalPlan("combo")}>CHOOSE COMBO →</PrimaryBtn>
           </div>
         </FadeIn>
 
@@ -1118,6 +1228,15 @@ export default function MembershipsClient() {
 
       {/* ── Booking Section ── */}
       <BookingSection selectedPlan={selectedPlan} onChangePlan={scrollToPricing} />
+      <AnimatePresence>
+        {modalPlan && (
+          <DurationModal
+            planKey={modalPlan}
+            onConfirm={selectPlan}
+            onClose={() => setModalPlan(null)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Bottom padding */}
       <div style={{ height: "40px" }} />
