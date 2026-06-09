@@ -296,9 +296,9 @@ function ContactForm() {
 
 // ─── Info card ────────────────────────────────────────────────────────────────
 
-function InfoCard({ icon, label, lines }: { icon: React.ReactNode; label: string; lines: string[] }) {
+function InfoCard({ icon, label, lines, href }: { icon: React.ReactNode; label: string; lines: string[]; href?: string }) {
   const [hov, setHov] = useState(false);
-  return (
+  const card = (
     <motion.div
       onHoverStart={() => setHov(true)}
       onHoverEnd={() => setHov(false)}
@@ -342,6 +342,10 @@ function InfoCard({ icon, label, lines }: { icon: React.ReactNode; label: string
       </div>
     </motion.div>
   );
+  if (href) {
+    return <a href={href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", display: "block" }}>{card}</a>;
+  }
+  return card;
 }
 
 // ─── SVG icons ────────────────────────────────────────────────────────────────
@@ -453,6 +457,7 @@ export default function ContactClient() {
                   icon={<IconWhatsApp />}
                   label="WHATSAPP US NOW"
                   lines={["Tap to open a chat directly", "Fastest way to reach us"]}
+                  href="https://wa.me/919474287110"
                 />
               </div>
 
