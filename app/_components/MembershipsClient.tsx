@@ -980,15 +980,23 @@ function BookingSection({ selectedPlan, onChangePlan }: { selectedPlan: string; 
               ))}
             </div>
 
-            {/* Address box */}
-            <div style={{ background: "rgba(255,130,0,0.04)", border: "1px solid rgba(255,130,0,0.1)", padding: "20px", marginBottom: "32px", }}>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "8px", fontWeight: 700, letterSpacing: "0.2em", color: "#FF8200", marginBottom: "8px" }}>📍 OUR LOCATION</div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "0.9rem", fontWeight: 600, color: "#F5F0EB" }}>Healthify Women&apos;s Fitness Club</div>
-              <div style={{ fontFamily: "var(--font-body)", fontSize: "0.82rem", fontWeight: 300, color: "rgba(245,240,235,0.45)", marginTop: "2px" }}>Sri Vijaya Puram, Andaman &amp; Nicobar Islands</div>
-              <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "10px" }}>
-                <span style={{ fontSize: "12px" }}>⏰</span>
-                <span style={{ fontFamily: "var(--font-body)", fontSize: "0.78rem", fontWeight: 300, color: "rgba(245,240,235,0.4)" }}>Mon–Sat: 6:00 AM – 9:00 PM</span>
-              </div>
+            {/* Address boxes */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "32px" }}>
+              {[
+                { name: "Healthify — Delanipur", address: "Opposite Petrol Pump, Delanipur", hours: "Mon–Sat: 5:00 AM – 8:00 PM" },
+                { name: "Healthify — Bambooflat", address: "Opp. GSSS Bambooflat School, Valluvar Nagar", hours: "Mon–Sat: 6:00 AM – 7:00 PM" },
+              ].map((loc) => (
+                <div key={loc.name} style={{ background: "rgba(255,130,0,0.04)", border: "1px solid rgba(255,130,0,0.1)", padding: "16px 20px" }}>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: "8px", fontWeight: 700, letterSpacing: "0.2em", color: "#FF8200", marginBottom: "6px" }}>📍 OUR LOCATION</div>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: "0.88rem", fontWeight: 600, color: "#F5F0EB" }}>{loc.name}</div>
+                  <div style={{ fontFamily: "var(--font-body)", fontSize: "0.78rem", fontWeight: 300, color: "rgba(245,240,235,0.45)", marginTop: "2px" }}>{loc.address}</div>
+                  <div style={{ fontFamily: "var(--font-body)", fontSize: "0.78rem", fontWeight: 300, color: "rgba(245,240,235,0.4)", marginTop: "2px" }}>Sri Vijaya Puram, Andaman &amp; Nicobar Islands</div>
+                  <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "8px" }}>
+                    <span style={{ fontSize: "11px" }}>⏰</span>
+                    <span style={{ fontFamily: "var(--font-body)", fontSize: "0.75rem", fontWeight: 300, color: "rgba(245,240,235,0.4)" }}>{loc.hours}</span>
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* Visit form */}
