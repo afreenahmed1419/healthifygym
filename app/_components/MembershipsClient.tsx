@@ -1190,7 +1190,8 @@ export default function MembershipsClient() {
   const showLifetime  = !hasLifetime;
   const showEssential = !activeCat || activeCat === "essential" || activeCat === "lifetime";
   const showYoga      = !activeCat || activeCat === "yoga"      || activeCat === "lifetime";
-  const showCombo     = !activeCat || activeCat === "combo"     || activeCat === "lifetime";
+  // Combo is always visible — it's an upgrade path from Essential, Yoga, or standalone
+  const showCombo     = true;
 
   // Per-section upgrade availability (same category, are there higher-rank options?)
   function upgradeOptionsExist(key: string): boolean {
