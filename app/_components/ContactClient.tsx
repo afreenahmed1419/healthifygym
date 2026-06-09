@@ -154,7 +154,7 @@ function ContactForm() {
       message.trim() ? `\nMessage: ${message.trim()}` : "",
     ].filter(Boolean).join("\n");
 
-    const url = `https://wa.me/919474287111?text=${encodeURIComponent(lines)}`;
+    const url = `https://wa.me/919474287110?text=${encodeURIComponent(lines)}`;
     window.open(url, "_blank");
     setSuccess(true);
   };
@@ -209,7 +209,7 @@ function ContactForm() {
             <input
               type="tel"
               value={whatsapp}
-              placeholder="+91 70631 64720"
+              placeholder="+91 98765 43210"
               onChange={(e) => { setWhatsapp(e.target.value); setErrors(p => ({ ...p, whatsapp: "" })); }}
               onFocus={() => setFocused("whatsapp")}
               onBlur={() => setFocused(null)}
@@ -447,7 +447,7 @@ export default function ContactClient() {
                 <InfoCard
                   icon={<IconPhone />}
                   label="CALL / WHATSAPP"
-                  lines={["+91 70631 64720"]}
+                  lines={["+91 94742 87110"]}
                 />
                 <InfoCard
                   icon={<IconWhatsApp />}
