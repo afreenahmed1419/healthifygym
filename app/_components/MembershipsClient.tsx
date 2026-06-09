@@ -6,6 +6,7 @@ import apiClient from "@/lib/api-client";
 import { openRazorpayCheckout } from "@/lib/razorpay";
 import { validatePhoneNumber } from "@/lib/auth";
 import HealthifyCard from "../_components/HealthifyCard";
+import { useAuth } from "@/context/AuthContext";
 
 // ─── Hex grid SVG background ──────────────────────────────────────────────────
 
@@ -159,12 +160,20 @@ const PLAN_DURATIONS: Record<string, { title: string; options: DurationOption[] 
 };
 
 function DurationModal({
-  planKey, onConfirm, onClose,
+  planKey, onConfirm, onClose, activeMembership,
 }: {
-  planKey: string; onConfirm: (planName: string) => void; onClose: () => void;
+  planKey: string;
+  onConfirm: (planName: string) => void;
+  onClose: () => void;
+  activeMembership: ActiveMembership | null;
 }) {
   const plan = PLAN_DURATIONS[planKey];
-  const [selected, setSelected] = useState(plan.options[0].planName);
+  const activeCat = activeMembership ? getPlanCategory(activeMembership.serviceName) : null;
+  const activeRank = activeMembership ? getDurationRank(activeMembership.serviceName) : 0;
+  const options = activeCat === planKey
+    ? plan.options.filter(o => getDurationRank(o.planName) > activeRank)
+    : plan.options;
+  const [selected, setSelected] = useState(() => options[0]?.planName ?? plan.options[0].planName);
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -193,7 +202,7 @@ function DurationModal({
             cursor: "pointer", fontSize: "22px", lineHeight: 1, padding: "0 0 0 12px" }}>{"✕"}</button>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "28px" }}>
-          {plan.options.map((opt) => {
+          {options.map((opt) => {
             const active = selected === opt.planName;
             return (
               <div key={opt.planName} onClick={() => setSelected(opt.planName)} style={{
@@ -226,6 +235,75 @@ function DurationModal({
           CONTINUE {"→"}
         </button>
       </motion.div>
+    </motion.div>
+  );
+}
+
+// ─── Active membership types + helpers ───────────────────────────────────────
+
+type ActiveMembership = {
+  id: string;
+  serviceName: string;
+  startDate: string;
+  expiresAt: string | null;
+  isLifetime: boolean;
+};
+
+function getPlanCategory(name: string): "essential" | "yoga" | "combo" | "lifetime" | "dropin" | null {
+  if (name.startsWith("Essential")) return "essential";
+  if (name.startsWith("Yoga"))      return "yoga";
+  if (name.startsWith("Strength + Zumba")) return "combo";
+  if (name === "Lifetime Membership")   return "lifetime";
+  if (name === "Drop-In Pass (Daily)") return "dropin";
+  return null;
+}
+
+function getDurationRank(name: string): number {
+  if (name.includes("PT Half Yearly")) return 7;
+  if (name.includes("PT Quarterly"))   return 6;
+  if (name.includes("PT Monthly"))     return 5;
+  if (name.includes("Yearly"))         return 4;
+  if (name.includes("Half Yearly"))    return 3;
+  if (name.includes("Quarterly"))      return 2;
+  if (name.includes("Monthly"))        return 1;
+  return 0;
+}
+
+function ActiveMemberBanner({ membership }: { membership: ActiveMembership }) {
+  const expiry = membership.expiresAt ? new Date(membership.expiresAt) : null;
+  const expiryStr = expiry
+    ? expiry.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })
+    : null;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+      style={{
+        maxWidth: "900px", margin: "0 auto 48px",
+        background: "linear-gradient(135deg, rgba(34,197,94,0.08) 0%, rgba(34,197,94,0.03) 100%)",
+        border: "1px solid rgba(34,197,94,0.3)", borderRadius: "12px",
+        padding: "20px 24px", display: "flex", alignItems: "center", gap: "16px",
+      }}
+    >
+      <div style={{
+        width: "42px", height: "42px", borderRadius: "50%", flexShrink: 0,
+        background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+      }}>
+        <span style={{ color: "#22c55e", fontSize: "20px", lineHeight: 1 }}>✓</span>
+      </div>
+      <div>
+        <div style={{ fontFamily: "var(--font-display)", fontSize: "9px", fontWeight: 700, letterSpacing: "0.25em", color: "#22c55e", marginBottom: "4px" }}>
+          ACTIVE MEMBERSHIP
+        </div>
+        <div style={{ fontFamily: "var(--font-bebas)", fontSize: "1.4rem", color: "#F5F0EB", lineHeight: 1, marginBottom: "4px" }}>
+          {membership.serviceName}
+        </div>
+        <div style={{ fontFamily: "var(--font-body)", fontSize: "0.78rem", fontWeight: 300, color: "rgba(245,240,235,0.45)" }}>
+          {membership.isLifetime ? "Lifetime Access — Never Expires" : expiryStr ? `Valid until ${expiryStr}` : ""}
+        </div>
+      </div>
     </motion.div>
   );
 }
@@ -1087,8 +1165,45 @@ function BookingSection({ selectedPlan, onChangePlan }: { selectedPlan: string; 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function MembershipsClient() {
+  const { user } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState("Essential (Strength) — Monthly");
   const [modalPlan, setModalPlan] = useState<string | null>(null);
+  const [activeMembership, setActiveMembership] = useState<ActiveMembership | null>(null);
+  const [hasLifetime, setHasLifetime] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    const token = localStorage.getItem("healthify_token");
+    if (!token) return;
+    fetch("/api/memberships/active", { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then((data: { activeMembership: ActiveMembership | null; hasLifetime: boolean }) => {
+        setActiveMembership(data.activeMembership ?? null);
+        setHasLifetime(data.hasLifetime ?? false);
+      })
+      .catch(() => { /* silently fail — show all plans */ });
+  }, [user]);
+
+  // Visibility flags derived from active membership
+  const activeCat = activeMembership ? getPlanCategory(activeMembership.serviceName) : null;
+  const showDropIn    = !activeMembership;
+  const showLifetime  = !hasLifetime;
+  const showEssential = !activeCat || activeCat === "essential" || activeCat === "lifetime";
+  const showYoga      = !activeCat || activeCat === "yoga"      || activeCat === "lifetime";
+  const showCombo     = !activeCat || activeCat === "combo"     || activeCat === "lifetime";
+
+  // Per-section upgrade availability (same category, are there higher-rank options?)
+  function upgradeOptionsExist(key: string): boolean {
+    if (!activeMembership || activeCat !== key) return false;
+    const rank = getDurationRank(activeMembership.serviceName);
+    return PLAN_DURATIONS[key].options.some(o => getDurationRank(o.planName) > rank);
+  }
+
+  function planBtnLabelFor(key: string, defaultLabel: string): string {
+    if (activeCat !== key) return defaultLabel;
+    const upgradable = upgradeOptionsExist(key);
+    return upgradable ? "UPGRADE PLAN →" : defaultLabel;
+  }
 
   const selectPlan = (planName: string) => {
     setSelectedPlan(planName);
@@ -1136,89 +1251,120 @@ export default function MembershipsClient() {
           </p>
         </motion.div>
 
+        {/* ── Active member banner ── */}
+        {activeMembership && <ActiveMemberBanner membership={activeMembership} />}
+
         {/* ── Special Plans ── */}
-        <div id="pricing-plans" className="rsp-grid-1" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", maxWidth: "900px", margin: "0 auto 48px", alignItems: "stretch" }}>
-          <FadeIn delay={0} stretch>
-            <SpecialCard
-              badge="⭐ BEST VALUE"
-              badgeStyle={{ background: "rgba(255,130,0,0.15)", border: "1px solid rgba(255,130,0,0.3)", color: "#FF8200" }}
-              cardStyle={{ background: "linear-gradient(135deg, rgba(255,130,0,0.12) 0%, rgba(15,15,15,1) 60%)", border: "1px solid rgba(255,130,0,0.3)" }}
-              hoverShadow="0 24px 60px rgba(255,130,0,0.15), 0 0 0 1px rgba(255,130,0,0.4)"
-              title="LIFETIME MEMBERSHIP"
-              price="₹3,000"
-              priceColor="#FF8200"
-              priceGlow
-              priceLabel="ONE TIME PAYMENT"
-              desc="One-time fee. Exclusive member benefits and special offers, only for you."
-              cta={<PrimaryBtn onClick={() => selectPlan("Lifetime Membership")}>CLAIM LIFETIME ACCESS →</PrimaryBtn>}
-            />
-          </FadeIn>
-          <FadeIn delay={0.15} stretch>
-            <SpecialCard
-              badge="⚡ DAILY PASS"
-              badgeStyle={{ background: "rgba(245,240,235,0.05)", border: "1px solid rgba(245,240,235,0.1)", color: "rgba(245,240,235,0.5)" }}
-              cardStyle={{ background: "#0F0F0F", border: "1px solid rgba(255,130,0,0.1)" }}
-              hoverShadow="0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,130,0,0.2)"
-              title="DROP-IN PASS"
-              subtitle="1 HOUR ACCESS"
-              price="₹250"
-              priceColor="#F5F0EB"
-              priceLabel="PER VISIT"
-              desc="Drop-in anytime. No commitment needed. Full gym access for one hour."
-              cta={<OutlineBtn onClick={() => selectPlan("Drop-In Pass (Daily)")}>BOOK DAY PASS →</OutlineBtn>}
-            />
-          </FadeIn>
+        <div id="pricing-plans" className="rsp-grid-1" style={{ display: "grid", gridTemplateColumns: showLifetime && showDropIn ? "1fr 1fr" : "1fr", gap: "20px", maxWidth: "900px", margin: "0 auto 48px", alignItems: "stretch" }}>
+          {showLifetime && (
+            <FadeIn delay={0} stretch>
+              <SpecialCard
+                badge="⭐ BEST VALUE"
+                badgeStyle={{ background: "rgba(255,130,0,0.15)", border: "1px solid rgba(255,130,0,0.3)", color: "#FF8200" }}
+                cardStyle={{ background: "linear-gradient(135deg, rgba(255,130,0,0.12) 0%, rgba(15,15,15,1) 60%)", border: "1px solid rgba(255,130,0,0.3)" }}
+                hoverShadow="0 24px 60px rgba(255,130,0,0.15), 0 0 0 1px rgba(255,130,0,0.4)"
+                title="LIFETIME MEMBERSHIP"
+                price="₹3,000"
+                priceColor="#FF8200"
+                priceGlow
+                priceLabel="ONE TIME PAYMENT"
+                desc="One-time fee. Exclusive member benefits and special offers, only for you."
+                cta={<PrimaryBtn onClick={() => selectPlan("Lifetime Membership")}>CLAIM LIFETIME ACCESS →</PrimaryBtn>}
+              />
+            </FadeIn>
+          )}
+          {showDropIn && (
+            <FadeIn delay={showLifetime ? 0.15 : 0} stretch>
+              <SpecialCard
+                badge="⚡ DAILY PASS"
+                badgeStyle={{ background: "rgba(245,240,235,0.05)", border: "1px solid rgba(245,240,235,0.1)", color: "rgba(245,240,235,0.5)" }}
+                cardStyle={{ background: "#0F0F0F", border: "1px solid rgba(255,130,0,0.1)" }}
+                hoverShadow="0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,130,0,0.2)"
+                title="DROP-IN PASS"
+                subtitle="1 HOUR ACCESS"
+                price="₹250"
+                priceColor="#F5F0EB"
+                priceLabel="PER VISIT"
+                desc="Drop-in anytime. No commitment needed. Full gym access for one hour."
+                cta={<OutlineBtn onClick={() => selectPlan("Drop-In Pass (Daily)")}>BOOK DAY PASS →</OutlineBtn>}
+              />
+            </FadeIn>
+          )}
         </div>
 
         {/* ── Essential ── */}
-        <FadeIn delay={0.1}>
-          <SectionLabel title="ESSENTIAL (STRENGTH)" />
-          <div style={{ maxWidth: "740px", margin: "0 auto 20px" }}>
-            <HealthifyCard>
-              <div className="rsp-pricing-wrap" style={{ padding: "36px" }}>
-                <PricingTable rows={ESSENTIAL_ROWS} />
-              </div>
-            </HealthifyCard>
-          </div>
-          <div style={{ maxWidth: "740px", margin: "0 auto 48px" }}>
-            <PrimaryBtn onClick={() => setModalPlan("essential")}>CHOOSE ESSENTIAL →</PrimaryBtn>
-          </div>
-        </FadeIn>
+        {showEssential && (
+          <FadeIn delay={0.1}>
+            <SectionLabel title="ESSENTIAL (STRENGTH)" />
+            <div style={{ maxWidth: "740px", margin: "0 auto 20px" }}>
+              <HealthifyCard>
+                <div className="rsp-pricing-wrap" style={{ padding: "36px" }}>
+                  <PricingTable rows={ESSENTIAL_ROWS} />
+                </div>
+              </HealthifyCard>
+            </div>
+            <div style={{ maxWidth: "740px", margin: "0 auto 48px" }}>
+              {activeCat === "essential" && !upgradeOptionsExist("essential") ? (
+                <div style={{ textAlign: "center", fontFamily: "var(--font-display)", fontSize: "12px", fontWeight: 700, letterSpacing: "0.2em", color: "#22c55e", padding: "18px", border: "1px solid rgba(34,197,94,0.3)", borderRadius: "8px" }}>
+                  ✓ YOU HAVE THE HIGHEST AVAILABLE PLAN
+                </div>
+              ) : (
+                <PrimaryBtn onClick={() => setModalPlan("essential")}>{planBtnLabelFor("essential", "CHOOSE ESSENTIAL →")}</PrimaryBtn>
+              )}
+            </div>
+          </FadeIn>
+        )}
 
         {/* ── Yoga/Zumba ── */}
-        <FadeIn delay={0.15}>
-          <SectionLabel title="YOGA OR AEROBICS/ZUMBA" subtitle="Including Zumba" />
-          <div style={{ maxWidth: "740px", margin: "0 auto 20px" }}>
-            <HealthifyCard>
-              <div className="rsp-pricing-wrap" style={{ padding: "36px" }}>
-                <YogaTable rows={YOGA_ROWS} />
-              </div>
-            </HealthifyCard>
-          </div>
-          <div style={{ maxWidth: "740px", margin: "0 auto 48px" }}>
-            <PrimaryBtn onClick={() => setModalPlan("yoga")}>CHOOSE YOGA/ZUMBA →</PrimaryBtn>
-          </div>
-        </FadeIn>
+        {showYoga && (
+          <FadeIn delay={0.15}>
+            <SectionLabel title="YOGA OR AEROBICS/ZUMBA" subtitle="Including Zumba" />
+            <div style={{ maxWidth: "740px", margin: "0 auto 20px" }}>
+              <HealthifyCard>
+                <div className="rsp-pricing-wrap" style={{ padding: "36px" }}>
+                  <YogaTable rows={YOGA_ROWS} />
+                </div>
+              </HealthifyCard>
+            </div>
+            <div style={{ maxWidth: "740px", margin: "0 auto 48px" }}>
+              {activeCat === "yoga" && !upgradeOptionsExist("yoga") ? (
+                <div style={{ textAlign: "center", fontFamily: "var(--font-display)", fontSize: "12px", fontWeight: 700, letterSpacing: "0.2em", color: "#22c55e", padding: "18px", border: "1px solid rgba(34,197,94,0.3)", borderRadius: "8px" }}>
+                  ✓ YOU HAVE THE HIGHEST AVAILABLE PLAN
+                </div>
+              ) : (
+                <PrimaryBtn onClick={() => setModalPlan("yoga")}>{planBtnLabelFor("yoga", "CHOOSE YOGA/ZUMBA →")}</PrimaryBtn>
+              )}
+            </div>
+          </FadeIn>
+        )}
 
         {/* ── Combo ── */}
-        <FadeIn delay={0.2}>
-          <SectionLabel title="STRENGTH + ZUMBA / AEROBICS" subtitle="For Members Only · Combo Offer" subtitleOrange />
-          <div style={{ textAlign: "center", marginBottom: "24px" }}>
-            <span style={{ display: "inline-block", fontFamily: "var(--font-display)", fontSize: "9px", fontWeight: 700, letterSpacing: "0.2em", color: "#FF8200", background: "rgba(255,130,0,0.1)", border: "1px solid rgba(255,130,0,0.25)", padding: "6px 16px", borderRadius: "6px" }}>
-              FOR MEMBERS ONLY
-            </span>
-          </div>
-          <div style={{ maxWidth: "900px", margin: "0 auto 20px" }}>
-            <HealthifyCard>
-              <div className="rsp-pricing-wrap" style={{ padding: "36px" }}>
-                <ComboTable rows={COMBO_ROWS} />
-              </div>
-            </HealthifyCard>
-          </div>
-          <div style={{ maxWidth: "900px", margin: "0 auto 48px" }}>
-            <PrimaryBtn onClick={() => setModalPlan("combo")}>CHOOSE COMBO →</PrimaryBtn>
-          </div>
-        </FadeIn>
+        {showCombo && (
+          <FadeIn delay={0.2}>
+            <SectionLabel title="STRENGTH + ZUMBA / AEROBICS" subtitle="For Members Only · Combo Offer" subtitleOrange />
+            <div style={{ textAlign: "center", marginBottom: "24px" }}>
+              <span style={{ display: "inline-block", fontFamily: "var(--font-display)", fontSize: "9px", fontWeight: 700, letterSpacing: "0.2em", color: "#FF8200", background: "rgba(255,130,0,0.1)", border: "1px solid rgba(255,130,0,0.25)", padding: "6px 16px", borderRadius: "6px" }}>
+                FOR MEMBERS ONLY
+              </span>
+            </div>
+            <div style={{ maxWidth: "900px", margin: "0 auto 20px" }}>
+              <HealthifyCard>
+                <div className="rsp-pricing-wrap" style={{ padding: "36px" }}>
+                  <ComboTable rows={COMBO_ROWS} />
+                </div>
+              </HealthifyCard>
+            </div>
+            <div style={{ maxWidth: "900px", margin: "0 auto 48px" }}>
+              {activeCat === "combo" && !upgradeOptionsExist("combo") ? (
+                <div style={{ textAlign: "center", fontFamily: "var(--font-display)", fontSize: "12px", fontWeight: 700, letterSpacing: "0.2em", color: "#22c55e", padding: "18px", border: "1px solid rgba(34,197,94,0.3)", borderRadius: "8px" }}>
+                  ✓ YOU HAVE THE HIGHEST AVAILABLE PLAN
+                </div>
+              ) : (
+                <PrimaryBtn onClick={() => setModalPlan("combo")}>{planBtnLabelFor("combo", "CHOOSE COMBO →")}</PrimaryBtn>
+              )}
+            </div>
+          </FadeIn>
+        )}
 
         {/* ── Trust badges ── */}
         <FadeIn delay={0.1}>
@@ -1242,6 +1388,7 @@ export default function MembershipsClient() {
             planKey={modalPlan}
             onConfirm={selectPlan}
             onClose={() => setModalPlan(null)}
+            activeMembership={activeMembership}
           />
         )}
       </AnimatePresence>
