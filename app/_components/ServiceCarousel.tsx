@@ -799,7 +799,8 @@ export default function ServiceCarousel() {
                 transition={{ duration: 0.5, ease: "easeInOut" }}
                 style={{
                   minHeight: EXP_H,
-                  boxShadow: "0 0 20px rgba(255,130,0,0.2), 0 0 60px rgba(255,130,0,0.1), 0 20px 40px rgba(0,0,0,0.4)",
+                  borderRadius: 16,
+                  boxShadow: "0 0 24px rgba(255,130,0,0.12), 0 12px 32px rgba(0,0,0,0.45)",
                 }}
               >
                 <HealthifyCard variant="bold" style={{ height: "100%" }}>
