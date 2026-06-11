@@ -160,20 +160,15 @@ const PLAN_DURATIONS: Record<string, { title: string; options: DurationOption[] 
 };
 
 function DurationModal({
-  planKey, onConfirm, onClose, activeMembership,
+  planKey, onConfirm, onClose,
 }: {
   planKey: string;
   onConfirm: (planName: string) => void;
   onClose: () => void;
-  activeMembership: ActiveMembership | null;
 }) {
   const plan = PLAN_DURATIONS[planKey];
-  const activeCat = activeMembership ? getPlanCategory(activeMembership.serviceName) : null;
-  const activeRank = activeMembership ? getDurationRank(activeMembership.serviceName) : 0;
-  const options = activeCat === planKey
-    ? plan.options.filter(o => getDurationRank(o.planName) > activeRank)
-    : plan.options;
-  const [selected, setSelected] = useState(() => options[0]?.planName ?? plan.options[0].planName);
+  const options = plan.options;
+  const [selected, setSelected] = useState(options[0].planName);
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -1186,25 +1181,10 @@ export default function MembershipsClient() {
 
   // Visibility flags derived from active membership
   const activeCat = activeMembership ? getPlanCategory(activeMembership.serviceName) : null;
+  const hasActiveClassPlan = activeCat === "essential" || activeCat === "yoga" || activeCat === "combo";
   const showDropIn    = !activeMembership;
   const showLifetime  = !hasLifetime;
-  const showEssential = !activeCat || activeCat === "essential" || activeCat === "lifetime";
-  const showYoga      = !activeCat || activeCat === "yoga"      || activeCat === "lifetime";
-  // Combo is always visible — it's an upgrade path from Essential, Yoga, or standalone
-  const showCombo     = true;
-
-  // Per-section upgrade availability (same category, are there higher-rank options?)
-  function upgradeOptionsExist(key: string): boolean {
-    if (!activeMembership || activeCat !== key) return false;
-    const rank = getDurationRank(activeMembership.serviceName);
-    return PLAN_DURATIONS[key].options.some(o => getDurationRank(o.planName) > rank);
-  }
-
-  function planBtnLabelFor(key: string, defaultLabel: string): string {
-    if (activeCat !== key) return defaultLabel;
-    const upgradable = upgradeOptionsExist(key);
-    return upgradable ? "UPGRADE PLAN →" : defaultLabel;
-  }
+  const showClassPlans = !hasActiveClassPlan;
 
   const selectPlan = (planName: string) => {
     setSelectedPlan(planName);
@@ -1255,6 +1235,40 @@ export default function MembershipsClient() {
         {/* ── Active member banner ── */}
         {activeMembership && <ActiveMemberBanner membership={activeMembership} />}
 
+        {/* ── Upgrade offline notice ── */}
+        {hasActiveClassPlan && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+            style={{
+              maxWidth: "900px", margin: "0 auto 48px",
+              background: "rgba(255,130,0,0.04)",
+              border: "1px solid rgba(255,130,0,0.2)", borderRadius: "12px",
+              padding: "28px 32px", textAlign: "center",
+            }}
+          >
+            <div style={{ fontFamily: "var(--font-bebas)", fontSize: "1.6rem", color: "#F5F0EB", marginBottom: "10px", letterSpacing: "0.04em" }}>
+              WANT TO CHANGE OR UPGRADE?
+            </div>
+            <p style={{ fontFamily: "var(--font-body)", fontSize: "0.88rem", fontWeight: 300, color: "rgba(245,240,235,0.5)", lineHeight: 1.7, marginBottom: "20px", maxWidth: "520px", margin: "0 auto 20px" }}>
+              Plan upgrades and changes are handled in person at the gym. Visit us and our team will sort it out for you right away.
+            </p>
+            <a
+              href="/contact"
+              style={{
+                display: "inline-flex", alignItems: "center", gap: "8px",
+                fontFamily: "var(--font-display)", fontSize: "12px", fontWeight: 700,
+                letterSpacing: "0.18em", color: "#FF8200", textDecoration: "none",
+                background: "rgba(255,130,0,0.08)", border: "1px solid rgba(255,130,0,0.25)",
+                padding: "12px 24px", borderRadius: "6px",
+              }}
+            >
+              GET OUR ADDRESS →
+            </a>
+          </motion.div>
+        )}
+
         {/* ── Special Plans ── */}
         <div id="pricing-plans" className="rsp-grid-1" style={{ display: "grid", gridTemplateColumns: showLifetime && showDropIn ? "1fr 1fr" : "1fr", gap: "20px", maxWidth: "900px", margin: "0 auto 48px", alignItems: "stretch" }}>
           {showLifetime && (
@@ -1294,7 +1308,7 @@ export default function MembershipsClient() {
         </div>
 
         {/* ── Essential ── */}
-        {showEssential && (
+        {showClassPlans && (
           <FadeIn delay={0.1}>
             <SectionLabel title="ESSENTIAL (STRENGTH)" />
             <div style={{ maxWidth: "740px", margin: "0 auto 20px" }}>
@@ -1305,19 +1319,13 @@ export default function MembershipsClient() {
               </HealthifyCard>
             </div>
             <div style={{ maxWidth: "740px", margin: "0 auto 48px" }}>
-              {activeCat === "essential" && !upgradeOptionsExist("essential") ? (
-                <div style={{ textAlign: "center", fontFamily: "var(--font-display)", fontSize: "12px", fontWeight: 700, letterSpacing: "0.2em", color: "#22c55e", padding: "18px", border: "1px solid rgba(34,197,94,0.3)", borderRadius: "8px" }}>
-                  ✓ YOU HAVE THE HIGHEST AVAILABLE PLAN
-                </div>
-              ) : (
-                <PrimaryBtn onClick={() => setModalPlan("essential")}>{planBtnLabelFor("essential", "CHOOSE ESSENTIAL →")}</PrimaryBtn>
-              )}
+              <PrimaryBtn onClick={() => setModalPlan("essential")}>CHOOSE ESSENTIAL →</PrimaryBtn>
             </div>
           </FadeIn>
         )}
 
         {/* ── Yoga/Zumba ── */}
-        {showYoga && (
+        {showClassPlans && (
           <FadeIn delay={0.15}>
             <SectionLabel title="YOGA OR AEROBICS/ZUMBA" subtitle="Including Zumba" />
             <div style={{ maxWidth: "740px", margin: "0 auto 20px" }}>
@@ -1328,19 +1336,13 @@ export default function MembershipsClient() {
               </HealthifyCard>
             </div>
             <div style={{ maxWidth: "740px", margin: "0 auto 48px" }}>
-              {activeCat === "yoga" && !upgradeOptionsExist("yoga") ? (
-                <div style={{ textAlign: "center", fontFamily: "var(--font-display)", fontSize: "12px", fontWeight: 700, letterSpacing: "0.2em", color: "#22c55e", padding: "18px", border: "1px solid rgba(34,197,94,0.3)", borderRadius: "8px" }}>
-                  ✓ YOU HAVE THE HIGHEST AVAILABLE PLAN
-                </div>
-              ) : (
-                <PrimaryBtn onClick={() => setModalPlan("yoga")}>{planBtnLabelFor("yoga", "CHOOSE YOGA/ZUMBA →")}</PrimaryBtn>
-              )}
+              <PrimaryBtn onClick={() => setModalPlan("yoga")}>CHOOSE YOGA/ZUMBA →</PrimaryBtn>
             </div>
           </FadeIn>
         )}
 
         {/* ── Combo ── */}
-        {showCombo && (
+        {showClassPlans && (
           <FadeIn delay={0.2}>
             <SectionLabel title="STRENGTH + ZUMBA / AEROBICS" subtitle="For Members Only · Combo Offer" subtitleOrange />
             <div style={{ textAlign: "center", marginBottom: "24px" }}>
@@ -1356,13 +1358,7 @@ export default function MembershipsClient() {
               </HealthifyCard>
             </div>
             <div style={{ maxWidth: "900px", margin: "0 auto 48px" }}>
-              {activeCat === "combo" && !upgradeOptionsExist("combo") ? (
-                <div style={{ textAlign: "center", fontFamily: "var(--font-display)", fontSize: "12px", fontWeight: 700, letterSpacing: "0.2em", color: "#22c55e", padding: "18px", border: "1px solid rgba(34,197,94,0.3)", borderRadius: "8px" }}>
-                  ✓ YOU HAVE THE HIGHEST AVAILABLE PLAN
-                </div>
-              ) : (
-                <PrimaryBtn onClick={() => setModalPlan("combo")}>{planBtnLabelFor("combo", "CHOOSE COMBO →")}</PrimaryBtn>
-              )}
+              <PrimaryBtn onClick={() => setModalPlan("combo")}>CHOOSE COMBO →</PrimaryBtn>
             </div>
           </FadeIn>
         )}
@@ -1389,7 +1385,6 @@ export default function MembershipsClient() {
             planKey={modalPlan}
             onConfirm={selectPlan}
             onClose={() => setModalPlan(null)}
-            activeMembership={activeMembership}
           />
         )}
       </AnimatePresence>
