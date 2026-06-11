@@ -125,110 +125,254 @@ const COMBO_ROWS = [
 
 // ─── Duration picker ──────────────────────────────────────────────────────────
 
-type DurationOption = { label: string; planName: string; price: string };
+type DurationOption = {
+  label: string;
+  planName: string;
+  memberPrice: string;
+  nonMemberPrice: string | null;
+  memberPricePaise: number;
+  nonMemberPricePaise: number | null;
+};
 const PLAN_DURATIONS: Record<string, { title: string; options: DurationOption[] }> = {
   essential: {
     title: "ESSENTIAL (STRENGTH)",
     options: [
-      { label: "Monthly",          planName: "Essential (Strength) — Monthly",        price: "₹3,000"  },
-      { label: "Quarterly",        planName: "Essential (Strength) — Quarterly",      price: "₹6,000"  },
-      { label: "Half Yearly",      planName: "Essential (Strength) — Half Yearly",    price: "₹10,000" },
-      { label: "Yearly",           planName: "Essential (Strength) — Yearly",         price: "₹18,000" },
-      { label: "PT / Monthly",     planName: "Essential (Strength) — PT Monthly",     price: "₹5,500"  },
-      { label: "PT / Quarterly",   planName: "Essential (Strength) — PT Quarterly",   price: "₹15,000" },
-      { label: "PT / Half Yearly", planName: "Essential (Strength) — PT Half Yearly", price: "₹27,000" },
+      { label: "Monthly",          planName: "Essential (Strength) — Monthly",        memberPrice: "₹3,000",  nonMemberPrice: "₹3,500",  memberPricePaise: 300000,  nonMemberPricePaise: 350000  },
+      { label: "Quarterly",        planName: "Essential (Strength) — Quarterly",      memberPrice: "₹6,000",  nonMemberPrice: "₹9,000",  memberPricePaise: 600000,  nonMemberPricePaise: 900000  },
+      { label: "Half Yearly",      planName: "Essential (Strength) — Half Yearly",    memberPrice: "₹10,000", nonMemberPrice: "₹15,000", memberPricePaise: 1000000, nonMemberPricePaise: 1500000 },
+      { label: "Yearly",           planName: "Essential (Strength) — Yearly",         memberPrice: "₹18,000", nonMemberPrice: "₹25,000", memberPricePaise: 1800000, nonMemberPricePaise: 2500000 },
+      { label: "PT / Monthly",     planName: "Essential (Strength) — PT Monthly",     memberPrice: "₹5,500",  nonMemberPrice: "₹6,500",  memberPricePaise: 550000,  nonMemberPricePaise: 650000  },
+      { label: "PT / Quarterly",   planName: "Essential (Strength) — PT Quarterly",   memberPrice: "₹15,000", nonMemberPrice: "₹19,500", memberPricePaise: 1500000, nonMemberPricePaise: 1950000 },
+      { label: "PT / Half Yearly", planName: "Essential (Strength) — PT Half Yearly", memberPrice: "₹27,000", nonMemberPrice: "₹39,000", memberPricePaise: 2700000, nonMemberPricePaise: 3900000 },
     ],
   },
   yoga: {
     title: "YOGA / AEROBICS / ZUMBA",
     options: [
-      { label: "Monthly",     planName: "Yoga / Aerobics / Zumba — Monthly",     price: "₹3,000"  },
-      { label: "Quarterly",   planName: "Yoga / Aerobics / Zumba — Quarterly",   price: "₹6,000"  },
-      { label: "Half Yearly", planName: "Yoga / Aerobics / Zumba — Half Yearly", price: "₹10,000" },
-      { label: "Yearly",      planName: "Yoga / Aerobics / Zumba — Yearly",      price: "₹18,000" },
+      { label: "Monthly",     planName: "Yoga / Aerobics / Zumba — Monthly",     memberPrice: "₹3,000",  nonMemberPrice: "₹3,500",  memberPricePaise: 300000,  nonMemberPricePaise: 350000  },
+      { label: "Quarterly",   planName: "Yoga / Aerobics / Zumba — Quarterly",   memberPrice: "₹6,000",  nonMemberPrice: "₹9,000",  memberPricePaise: 600000,  nonMemberPricePaise: 900000  },
+      { label: "Half Yearly", planName: "Yoga / Aerobics / Zumba — Half Yearly", memberPrice: "₹10,000", nonMemberPrice: "₹15,000", memberPricePaise: 1000000, nonMemberPricePaise: 1500000 },
+      { label: "Yearly",      planName: "Yoga / Aerobics / Zumba — Yearly",      memberPrice: "₹18,000", nonMemberPrice: "₹25,000", memberPricePaise: 1800000, nonMemberPricePaise: 2500000 },
     ],
   },
   combo: {
     title: "STRENGTH + ZUMBA / AEROBICS",
     options: [
-      { label: "Monthly",     planName: "Strength + Zumba / Aerobics (Combo) — Monthly",     price: "₹5,000"  },
-      { label: "Quarterly",   planName: "Strength + Zumba / Aerobics (Combo) — Quarterly",   price: "₹10,000" },
-      { label: "Half Yearly", planName: "Strength + Zumba / Aerobics (Combo) — Half Yearly", price: "₹17,500" },
-      { label: "Yearly",      planName: "Strength + Zumba / Aerobics (Combo) — Yearly",      price: "₹30,000" },
+      { label: "Monthly",     planName: "Strength + Zumba / Aerobics (Combo) — Monthly",     memberPrice: "₹5,000",  nonMemberPrice: null, memberPricePaise: 500000,  nonMemberPricePaise: null },
+      { label: "Quarterly",   planName: "Strength + Zumba / Aerobics (Combo) — Quarterly",   memberPrice: "₹10,000", nonMemberPrice: null, memberPricePaise: 1000000, nonMemberPricePaise: null },
+      { label: "Half Yearly", planName: "Strength + Zumba / Aerobics (Combo) — Half Yearly", memberPrice: "₹17,500", nonMemberPrice: null, memberPricePaise: 1750000, nonMemberPricePaise: null },
+      { label: "Yearly",      planName: "Strength + Zumba / Aerobics (Combo) — Yearly",      memberPrice: "₹30,000", nonMemberPrice: null, memberPricePaise: 3000000, nonMemberPricePaise: null },
     ],
   },
 };
 
 function DurationModal({
-  planKey, onConfirm, onClose,
+  planKey, hasLifetime, onConfirm, onClose,
 }: {
   planKey: string;
-  onConfirm: (planName: string) => void;
+  hasLifetime: boolean;
+  onConfirm: (planName: string, includeMembership: boolean) => void;
   onClose: () => void;
 }) {
   const plan = PLAN_DURATIONS[planKey];
   const options = plan.options;
-  const [selected, setSelected] = useState(options[0].planName);
+  const [step, setStep] = useState<1 | 2>(1);
+  const [selectedName, setSelectedName] = useState(options[0].planName);
+  const isCombo = planKey === "combo";
+
+  const selectedOpt = options.find((o) => o.planName === selectedName) ?? options[0];
+  const MEMBERSHIP_FEE = 3000;
+  const withTotal = selectedOpt.memberPricePaise / 100 + MEMBERSHIP_FEE;
+  const withTotalStr = inr(withTotal);
+  const withoutTotal = selectedOpt.nonMemberPricePaise != null ? selectedOpt.nonMemberPricePaise / 100 : selectedOpt.memberPricePaise / 100;
+  const withoutStr = selectedOpt.nonMemberPrice ?? selectedOpt.memberPrice;
+  const savings = withoutTotal - withTotal;
+
+  const handleStep1Continue = () => {
+    if (hasLifetime) {
+      onConfirm(selectedName, false);
+      onClose();
+    } else {
+      setStep(2);
+    }
+  };
+
+  const overlayStyle: React.CSSProperties = {
+    position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.78)",
+    backdropFilter: "blur(4px)", display: "flex", alignItems: "center",
+    justifyContent: "center", padding: "20px",
+  };
+  const cardStyle: React.CSSProperties = {
+    background: "#111", border: "1px solid rgba(255,130,0,0.25)", borderRadius: "16px",
+    padding: "32px", width: "100%", maxWidth: "500px",
+    boxShadow: "0 32px 80px rgba(0,0,0,0.8)", maxHeight: "90vh", overflowY: "auto" as const,
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.78)",
-        backdropFilter: "blur(4px)", display: "flex", alignItems: "center",
-        justifyContent: "center", padding: "20px" }}
-      onClick={onClose}
-    >
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      style={overlayStyle} onClick={onClose}>
       <motion.div
-        initial={{ opacity: 0, y: 28, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
+        initial={{ opacity: 0, y: 28, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 14, scale: 0.97 }}
         transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
-        style={{ background: "#111", border: "1px solid rgba(255,130,0,0.25)", borderRadius: "16px",
-          padding: "32px", width: "100%", maxWidth: "460px",
-          boxShadow: "0 32px 80px rgba(0,0,0,0.8)", maxHeight: "90vh", overflowY: "auto" as const }}
-        onClick={(e) => e.stopPropagation()}
+        style={cardStyle} onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "24px" }}>
-          <div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "10px", fontWeight: 600,
-              letterSpacing: "0.25em", color: "#FF8200", marginBottom: "6px" }}>SELECT DURATION</div>
-            <div style={{ fontFamily: "var(--font-bebas)", fontSize: "1.6rem", color: "#F5F0EB", lineHeight: 1 }}>{plan.title}</div>
-          </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(245,240,235,0.4)",
-            cursor: "pointer", fontSize: "22px", lineHeight: 1, padding: "0 0 0 12px" }}>{"✕"}</button>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "28px" }}>
-          {options.map((opt) => {
-            const active = selected === opt.planName;
-            return (
-              <div key={opt.planName} onClick={() => setSelected(opt.planName)} style={{
-                display: "flex", justifyContent: "space-between", alignItems: "center",
-                padding: "14px 18px", borderRadius: "10px", cursor: "pointer",
-                border: `1px solid ${active ? "#FF8200" : "rgba(255,130,0,0.12)"}`,
-                background: active ? "rgba(255,130,0,0.1)" : "rgba(255,255,255,0.02)",
-                transition: "border-color 0.18s, background 0.18s",
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <div style={{ width: "16px", height: "16px", borderRadius: "50%", flexShrink: 0,
-                    border: `2px solid ${active ? "#FF8200" : "rgba(255,130,0,0.3)"}`,
-                    background: active ? "#FF8200" : "transparent",
-                    transition: "border-color 0.18s, background 0.18s" }} />
-                  <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 600,
-                    letterSpacing: "0.06em", color: active ? "#F5F0EB" : "rgba(245,240,235,0.65)",
-                    textTransform: "uppercase" as const }}>{opt.label}</span>
-                </div>
-                <span style={{ fontFamily: "var(--font-bebas)", fontSize: "1.15rem",
-                  color: active ? "#FF8200" : "rgba(245,240,235,0.5)", letterSpacing: "0.04em" }}>{opt.price}</span>
+        {step === 1 ? (
+          <>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "24px" }}>
+              <div>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: "10px", fontWeight: 600, letterSpacing: "0.25em", color: "#FF8200", marginBottom: "6px" }}>SELECT DURATION</div>
+                <div style={{ fontFamily: "var(--font-bebas)", fontSize: "1.6rem", color: "#F5F0EB", lineHeight: 1 }}>{plan.title}</div>
               </div>
-            );
-          })}
-        </div>
-        <button onClick={() => { onConfirm(selected); onClose(); }} style={{
-          width: "100%", padding: "15px", background: "#FF8200", color: "#080808",
-          fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700,
-          letterSpacing: "0.18em", textTransform: "uppercase" as const,
-          border: "none", borderRadius: "8px", cursor: "pointer" }}>
-          CONTINUE {"→"}
-        </button>
+              <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(245,240,235,0.4)", cursor: "pointer", fontSize: "22px", lineHeight: 1, padding: "0 0 0 12px" }}>✕</button>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "20px" }}>
+              {options.map((opt) => {
+                const active = selectedName === opt.planName;
+                return (
+                  <div key={opt.planName} onClick={() => setSelectedName(opt.planName)} style={{
+                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                    padding: "14px 18px", borderRadius: "10px", cursor: "pointer",
+                    border: `1px solid ${active ? "#FF8200" : "rgba(255,130,0,0.12)"}`,
+                    background: active ? "rgba(255,130,0,0.1)" : "rgba(255,255,255,0.02)",
+                    transition: "border-color 0.18s, background 0.18s",
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <div style={{ width: "16px", height: "16px", borderRadius: "50%", flexShrink: 0,
+                        border: `2px solid ${active ? "#FF8200" : "rgba(255,130,0,0.3)"}`,
+                        background: active ? "#FF8200" : "transparent", transition: "border-color 0.18s, background 0.18s" }} />
+                      <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 600,
+                        letterSpacing: "0.06em", color: active ? "#F5F0EB" : "rgba(245,240,235,0.65)", textTransform: "uppercase" as const }}>{opt.label}</span>
+                    </div>
+                    <span style={{ fontFamily: "var(--font-bebas)", fontSize: "1.15rem",
+                      color: active ? "#FF8200" : "rgba(245,240,235,0.5)", letterSpacing: "0.04em" }}>
+                      {opt.nonMemberPrice ?? opt.memberPrice}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            {!hasLifetime && (
+              <div style={{ background: "rgba(255,130,0,0.04)", border: "1px solid rgba(255,130,0,0.12)", borderRadius: "8px", padding: "11px 14px", marginBottom: "18px" }}>
+                <span style={{ fontFamily: "var(--font-display)", fontSize: "11px", color: "rgba(255,130,0,0.65)", letterSpacing: "0.03em" }}>
+                  💡 Members get lower prices — you can add membership in the next step.
+                </span>
+              </div>
+            )}
+            <button onClick={handleStep1Continue} style={{
+              width: "100%", padding: "15px", background: "#FF8200", color: "#080808",
+              fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700,
+              letterSpacing: "0.18em", textTransform: "uppercase" as const,
+              border: "none", borderRadius: "8px", cursor: "pointer" }}>
+              CONTINUE →
+            </button>
+          </>
+        ) : (
+          <>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "6px" }}>
+              <div>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: "10px", fontWeight: 600, letterSpacing: "0.25em", color: "#FF8200", marginBottom: "6px" }}>
+                  {isCombo ? "MEMBERSHIP REQUIRED" : "ADD LIFETIME MEMBERSHIP?"}
+                </div>
+                <div style={{ fontFamily: "var(--font-bebas)", fontSize: "1.35rem", color: "#F5F0EB", lineHeight: 1 }}>{selectedOpt.label} · {plan.title}</div>
+              </div>
+              <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(245,240,235,0.4)", cursor: "pointer", fontSize: "22px", lineHeight: 1, padding: "0 0 0 12px" }}>✕</button>
+            </div>
+            <button onClick={() => setStep(1)} style={{ background: "none", border: "none", color: "rgba(255,130,0,0.55)", fontFamily: "var(--font-display)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em", cursor: "pointer", padding: "0 0 18px 0", display: "block" }}>
+              ← CHANGE DURATION
+            </button>
+
+            {isCombo ? (
+              <>
+                <div style={{ background: "rgba(255,130,0,0.06)", border: "1px solid rgba(255,130,0,0.2)", borderRadius: "10px", padding: "20px", marginBottom: "16px" }}>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: "10px", fontWeight: 700, letterSpacing: "0.15em", color: "rgba(245,240,235,0.45)", marginBottom: "14px" }}>COMBO PLAN IS EXCLUSIVE TO MEMBERS</div>
+                  {[
+                    { label: "Combo Plan", price: selectedOpt.memberPrice },
+                    { label: "Lifetime Membership", price: "₹3,000" },
+                  ].map((row) => (
+                    <div key={row.label} style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                      <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", color: "rgba(245,240,235,0.65)" }}>{row.label}</span>
+                      <span style={{ fontFamily: "var(--font-bebas)", fontSize: "1.05rem", color: "#F5F0EB" }}>{row.price}</span>
+                    </div>
+                  ))}
+                  <div style={{ height: "1px", background: "rgba(255,130,0,0.2)", margin: "10px 0" }} />
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, color: "#F5F0EB" }}>TOTAL</span>
+                    <span style={{ fontFamily: "var(--font-bebas)", fontSize: "1.4rem", color: "#FF8200" }}>{withTotalStr}</span>
+                  </div>
+                </div>
+                <div style={{ background: "rgba(34,197,94,0.05)", border: "1px solid rgba(34,197,94,0.15)", borderRadius: "8px", padding: "14px 16px", marginBottom: "18px" }}>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: "10px", fontWeight: 700, letterSpacing: "0.12em", color: "#22c55e", marginBottom: "8px" }}>YOUR LIFETIME MEMBER BENEFITS</div>
+                  {["Member pricing on all future plans", "Drop-in pass at ₹200 (non-members pay ₹250)", "Exclusive member-only offers"].map((b) => (
+                    <div key={b} style={{ display: "flex", gap: "8px", marginBottom: "4px" }}>
+                      <span style={{ color: "#22c55e", fontSize: "12px", flexShrink: 0 }}>✓</span>
+                      <span style={{ fontFamily: "var(--font-body)", fontSize: "0.8rem", fontWeight: 300, color: "rgba(245,240,235,0.5)" }}>{b}</span>
+                    </div>
+                  ))}
+                </div>
+                <button onClick={() => { onConfirm(selectedName, true); onClose(); }} style={{
+                  width: "100%", padding: "15px", background: "#FF8200", color: "#080808",
+                  fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700,
+                  letterSpacing: "0.18em", textTransform: "uppercase" as const,
+                  border: "none", borderRadius: "8px", cursor: "pointer" }}>
+                  CONFIRM & PROCEED →
+                </button>
+              </>
+            ) : (
+              <>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "18px" }}>
+                  <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "10px", padding: "18px 14px" }}>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: "9px", fontWeight: 700, letterSpacing: "0.18em", color: "rgba(245,240,235,0.35)", marginBottom: "10px" }}>WITHOUT MEMBERSHIP</div>
+                    <div style={{ fontFamily: "var(--font-bebas)", fontSize: "2rem", color: "#F5F0EB", lineHeight: 1 }}>{withoutStr}</div>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: "10px", color: "rgba(245,240,235,0.28)", marginTop: "6px" }}>standard rate</div>
+                  </div>
+                  <div style={{ background: "rgba(255,130,0,0.07)", border: "1px solid rgba(255,130,0,0.3)", borderRadius: "10px", padding: "18px 14px" }}>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: "9px", fontWeight: 700, letterSpacing: "0.18em", color: "#FF8200", marginBottom: "6px" }}>WITH MEMBERSHIP</div>
+                    <div style={{ fontFamily: "var(--font-display)", fontSize: "10px", color: "rgba(245,240,235,0.38)", marginBottom: "4px" }}>₹3,000 + {selectedOpt.memberPrice}</div>
+                    <div style={{ fontFamily: "var(--font-bebas)", fontSize: "2rem", color: "#FF8200", lineHeight: 1 }}>{withTotalStr}</div>
+                    {savings > 0 && (
+                      <div style={{ fontFamily: "var(--font-display)", fontSize: "9px", fontWeight: 700, letterSpacing: "0.1em", color: "#22c55e", marginTop: "8px", background: "rgba(34,197,94,0.12)", display: "inline-block", padding: "3px 8px", borderRadius: "4px" }}>
+                        SAVE {inr(savings)}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div style={{ background: "rgba(255,130,0,0.03)", border: "1px solid rgba(255,130,0,0.1)", borderRadius: "8px", padding: "14px 16px", marginBottom: "18px" }}>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: "10px", fontWeight: 700, letterSpacing: "0.16em", color: "#FF8200", marginBottom: "10px" }}>IS MEMBERSHIP WORTH IT?</div>
+                  {[
+                    "One-time payment of ₹3,000 — never expires",
+                    savings > 0 ? `${selectedOpt.label} plan saves you ${inr(savings)} right away with membership` : "Half Yearly & Yearly plans offer big savings with membership",
+                    "Drop-in pass: ₹200 for members (non-members pay ₹250)",
+                    "Recommended if you plan to train for 6 months or more",
+                  ].map((pt, i) => (
+                    <div key={i} style={{ display: "flex", gap: "8px", marginBottom: "5px" }}>
+                      <span style={{ color: "#FF8200", fontSize: "10px", marginTop: "2px", flexShrink: 0 }}>•</span>
+                      <span style={{ fontFamily: "var(--font-body)", fontSize: "0.78rem", fontWeight: 300, color: "rgba(245,240,235,0.5)", lineHeight: 1.5 }}>{pt}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  <button onClick={() => { onConfirm(selectedName, true); onClose(); }} style={{
+                    width: "100%", padding: "15px", background: "#FF8200", color: "#080808",
+                    fontFamily: "var(--font-display)", fontSize: "12px", fontWeight: 700,
+                    letterSpacing: "0.14em", textTransform: "uppercase" as const,
+                    border: "none", borderRadius: "8px", cursor: "pointer" }}>
+                    YES, ADD MEMBERSHIP — {withTotalStr} TOTAL →
+                  </button>
+                  <button onClick={() => { onConfirm(selectedName, false); onClose(); }} style={{
+                    width: "100%", padding: "14px", background: "transparent", color: "rgba(245,240,235,0.5)",
+                    fontFamily: "var(--font-display)", fontSize: "11px", fontWeight: 600,
+                    letterSpacing: "0.1em", textTransform: "uppercase" as const,
+                    border: "1px solid rgba(255,255,255,0.09)", borderRadius: "8px", cursor: "pointer" }}>
+                    CONTINUE WITHOUT MEMBERSHIP ({withoutStr})
+                  </button>
+                </div>
+              </>
+            )}
+          </>
+        )}
       </motion.div>
     </motion.div>
   );
@@ -245,11 +389,12 @@ type ActiveMembership = {
 };
 
 function getPlanCategory(name: string): "essential" | "yoga" | "combo" | "lifetime" | "dropin" | null {
-  if (name.startsWith("Essential")) return "essential";
-  if (name.startsWith("Yoga"))      return "yoga";
-  if (name.startsWith("Strength + Zumba")) return "combo";
-  if (name === "Lifetime Membership")   return "lifetime";
-  if (name === "Drop-In Pass (Daily)") return "dropin";
+  const base = name.replace(" + Lifetime Membership", "");
+  if (base.startsWith("Essential"))       return "essential";
+  if (base.startsWith("Yoga"))            return "yoga";
+  if (base.startsWith("Strength + Zumba")) return "combo";
+  if (base === "Lifetime Membership")     return "lifetime";
+  if (base === "Drop-In Pass (Daily)")   return "dropin";
   return null;
 }
 
@@ -639,7 +784,12 @@ function firstAvailableSlot(branch: BranchId, dateStr: string): string {
 
 // ─── Booking Section ──────────────────────────────────────────────────────────
 
-function BookingSection({ selectedPlan, onChangePlan }: { selectedPlan: string; onChangePlan: () => void }) {
+function BookingSection({ selectedPlan, selectedIncludesMembership, isMember, onChangePlan }: {
+  selectedPlan: string;
+  selectedIncludesMembership: boolean;
+  isMember: boolean;
+  onChangePlan: () => void;
+}) {
   const [days] = useState(() => generateNext7Days());
   const [selectedDay, setSelectedDay] = useState(days[0].dateStr);
   const [selectedBranch, setSelectedBranch] = useState<BranchId>("portblair");
@@ -697,6 +847,8 @@ function BookingSection({ selectedPlan, onChangePlan }: { selectedPlan: string; 
         phone: bPhone,
         whatsappNumber: bWhatsapp,
         goal: bGoal,
+        isMember,
+        includeMembership: selectedIncludesMembership,
       });
       const { razorpayOrder } = res.data;
 
@@ -836,7 +988,9 @@ function BookingSection({ selectedPlan, onChangePlan }: { selectedPlan: string; 
             <div className="rsp-plan-bar" style={{ background: "rgba(255,130,0,0.06)", border: "1px solid rgba(255,130,0,0.2)", padding: "14px 20px", marginBottom: "28px", display: "flex", justifyContent: "space-between", alignItems: "center", }}>
               <div>
                 <div style={{ fontFamily: "var(--font-display)", fontSize: "8px", fontWeight: 700, letterSpacing: "0.2em", color: "rgba(255,130,0,0.6)", marginBottom: "4px" }}>SELECTED PLAN</div>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: "0.9rem", fontWeight: 600, color: "#F5F0EB" }}>{selectedPlan}</div>
+                <div style={{ fontFamily: "var(--font-display)", fontSize: "0.9rem", fontWeight: 600, color: "#F5F0EB" }}>
+                  {selectedIncludesMembership ? `${selectedPlan} + Lifetime Membership` : selectedPlan}
+                </div>
               </div>
               <button
                 onClick={onChangePlan}
@@ -1162,6 +1316,7 @@ function BookingSection({ selectedPlan, onChangePlan }: { selectedPlan: string; 
 export default function MembershipsClient() {
   const { user } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState("Essential (Strength) — Monthly");
+  const [selectedIncludesMembership, setSelectedIncludesMembership] = useState(false);
   const [modalPlan, setModalPlan] = useState<string | null>(null);
   const [activeMembership, setActiveMembership] = useState<ActiveMembership | null>(null);
   const [hasLifetime, setHasLifetime] = useState(false);
@@ -1179,15 +1334,14 @@ export default function MembershipsClient() {
       .catch(() => { /* silently fail — show all plans */ });
   }, [user]);
 
-  // Visibility flags derived from active membership
   const activeCat = activeMembership ? getPlanCategory(activeMembership.serviceName) : null;
   const hasActiveClassPlan = activeCat === "essential" || activeCat === "yoga" || activeCat === "combo";
-  const showDropIn    = !activeMembership;
-  const showLifetime  = !hasLifetime;
+  const showDropIn    = !hasActiveClassPlan;
   const showClassPlans = !hasActiveClassPlan;
 
-  const selectPlan = (planName: string) => {
+  const selectPlan = (planName: string, includeMembership: boolean) => {
     setSelectedPlan(planName);
+    setSelectedIncludesMembership(includeMembership);
     setTimeout(() => {
       document.getElementById("booking-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 50);
@@ -1270,26 +1424,9 @@ export default function MembershipsClient() {
         )}
 
         {/* ── Special Plans ── */}
-        <div id="pricing-plans" className="rsp-grid-1" style={{ display: "grid", gridTemplateColumns: showLifetime && showDropIn ? "1fr 1fr" : "1fr", gap: "20px", maxWidth: "900px", margin: "0 auto 48px", alignItems: "stretch" }}>
-          {showLifetime && (
+        {showDropIn && (
+          <div id="pricing-plans" style={{ maxWidth: "480px", margin: "0 auto 48px" }}>
             <FadeIn delay={0} stretch>
-              <SpecialCard
-                badge="⭐ BEST VALUE"
-                badgeStyle={{ background: "rgba(255,130,0,0.15)", border: "1px solid rgba(255,130,0,0.3)", color: "#FF8200" }}
-                cardStyle={{ background: "linear-gradient(135deg, rgba(255,130,0,0.12) 0%, rgba(15,15,15,1) 60%)", border: "1px solid rgba(255,130,0,0.3)" }}
-                hoverShadow="0 24px 60px rgba(255,130,0,0.15), 0 0 0 1px rgba(255,130,0,0.4)"
-                title="LIFETIME MEMBERSHIP"
-                price="₹3,000"
-                priceColor="#FF8200"
-                priceGlow
-                priceLabel="ONE TIME PAYMENT"
-                desc="One-time fee. Exclusive member benefits and special offers, only for you."
-                cta={<PrimaryBtn onClick={() => selectPlan("Lifetime Membership")}>CLAIM LIFETIME ACCESS →</PrimaryBtn>}
-              />
-            </FadeIn>
-          )}
-          {showDropIn && (
-            <FadeIn delay={showLifetime ? 0.15 : 0} stretch>
               <SpecialCard
                 badge="⚡ DAILY PASS"
                 badgeStyle={{ background: "rgba(245,240,235,0.05)", border: "1px solid rgba(245,240,235,0.1)", color: "rgba(245,240,235,0.5)" }}
@@ -1297,15 +1434,16 @@ export default function MembershipsClient() {
                 hoverShadow="0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,130,0,0.2)"
                 title="DROP-IN PASS"
                 subtitle="1 HOUR ACCESS"
-                price="₹250"
+                price={hasLifetime ? "₹200" : "₹250"}
                 priceColor="#F5F0EB"
-                priceLabel="PER VISIT"
-                desc="Drop-in anytime. No commitment needed. Full gym access for one hour."
-                cta={<OutlineBtn onClick={() => selectPlan("Drop-In Pass (Daily)")}>BOOK DAY PASS →</OutlineBtn>}
+                priceLabel={hasLifetime ? "MEMBER PRICE · PER VISIT" : "PER VISIT · MEMBERS GET ₹200"}
+                desc={hasLifetime ? "Member benefit — drop in anytime at ₹200 per session. Full gym access for one hour." : "No commitment needed. Full gym access for one hour. Lifetime members get ₹200 rate."}
+                cta={<OutlineBtn onClick={() => selectPlan("Drop-In Pass (Daily)", false)}>BOOK DAY PASS →</OutlineBtn>}
               />
             </FadeIn>
-          )}
-        </div>
+          </div>
+        )}
+        {!showDropIn && <div id="pricing-plans" />}
 
         {/* ── Essential ── */}
         {showClassPlans && (
@@ -1378,11 +1516,17 @@ export default function MembershipsClient() {
       </div>
 
       {/* ── Booking Section ── */}
-      <BookingSection selectedPlan={selectedPlan} onChangePlan={scrollToPricing} />
+      <BookingSection
+        selectedPlan={selectedPlan}
+        selectedIncludesMembership={selectedIncludesMembership}
+        isMember={hasLifetime}
+        onChangePlan={scrollToPricing}
+      />
       <AnimatePresence>
         {modalPlan && (
           <DurationModal
             planKey={modalPlan}
+            hasLifetime={hasLifetime}
             onConfirm={selectPlan}
             onClose={() => setModalPlan(null)}
           />

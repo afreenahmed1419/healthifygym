@@ -4,9 +4,8 @@ import { requireAuth } from "@/lib/api-auth";
 import { createRazorpayOrder } from "@/lib/razorpay.server";
 import { sanitizeString } from "@/lib/sanitize";
 
-// Server-side price list in paise (₹ × 100) — single source of truth
-const MEMBERSHIP_PRICES: Record<string, number> = {
-  // Essential (Strength)
+// Member prices in paise (₹ × 100)
+const MEMBER_PRICES: Record<string, number> = {
   "Essential (Strength) — Monthly":        300000,
   "Essential (Strength) — Quarterly":      600000,
   "Essential (Strength) — Half Yearly":   1000000,
@@ -14,19 +13,30 @@ const MEMBERSHIP_PRICES: Record<string, number> = {
   "Essential (Strength) — PT Monthly":     550000,
   "Essential (Strength) — PT Quarterly":  1500000,
   "Essential (Strength) — PT Half Yearly":2700000,
-  // Yoga / Aerobics / Zumba
   "Yoga / Aerobics / Zumba — Monthly":     300000,
   "Yoga / Aerobics / Zumba — Quarterly":   600000,
   "Yoga / Aerobics / Zumba — Half Yearly":1000000,
   "Yoga / Aerobics / Zumba — Yearly":     1800000,
-  // Combo
   "Strength + Zumba / Aerobics (Combo) — Monthly":     500000,
   "Strength + Zumba / Aerobics (Combo) — Quarterly":  1000000,
   "Strength + Zumba / Aerobics (Combo) — Half Yearly":1750000,
   "Strength + Zumba / Aerobics (Combo) — Yearly":     3000000,
-  // Special
-  "Lifetime Membership":  300000,
-  "Drop-In Pass (Daily)":  25000,
+  "Lifetime Membership": 300000,
+};
+
+// Non-member prices for Essential and Yoga plans
+const NON_MEMBER_PRICES: Record<string, number> = {
+  "Essential (Strength) — Monthly":         350000,
+  "Essential (Strength) — Quarterly":       900000,
+  "Essential (Strength) — Half Yearly":    1500000,
+  "Essential (Strength) — Yearly":         2500000,
+  "Essential (Strength) — PT Monthly":      650000,
+  "Essential (Strength) — PT Quarterly":   1950000,
+  "Essential (Strength) — PT Half Yearly": 3900000,
+  "Yoga / Aerobics / Zumba — Monthly":      350000,
+  "Yoga / Aerobics / Zumba — Quarterly":    900000,
+  "Yoga / Aerobics / Zumba — Half Yearly": 1500000,
+  "Yoga / Aerobics / Zumba — Yearly":      2500000,
 };
 
 export async function POST(req: NextRequest) {
@@ -42,6 +52,8 @@ export async function POST(req: NextRequest) {
       amount: number;
       whatsappNumber?: string;
       notes?: string;
+      isMember?: boolean;
+      includeMembership?: boolean;
     };
 
     const body = {
@@ -51,6 +63,8 @@ export async function POST(req: NextRequest) {
       amount: Number(raw.amount),
       whatsappNumber: raw.whatsappNumber ? sanitizeString(raw.whatsappNumber) : undefined,
       notes: raw.notes ? sanitizeString(raw.notes) : undefined,
+      isMember: !!raw.isMember,
+      includeMembership: !!raw.includeMembership,
     };
 
     const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -63,13 +77,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: "Booking time must be in HH:MM format." }, { status: 400 });
     }
 
-    // Look up the correct price server-side — never trust the client amount
-    const correctAmount = MEMBERSHIP_PRICES[body.serviceName];
-    if (!correctAmount) {
-      return NextResponse.json({ success: false, message: "Invalid service selected." }, { status: 400 });
+    // Resolve price and final service name server-side
+    let correctAmount: number;
+    let finalServiceName = body.serviceName;
+
+    if (body.serviceName === "Drop-In Pass (Daily)") {
+      correctAmount = body.isMember ? 20000 : 25000;
+    } else if (body.isMember) {
+      const p = MEMBER_PRICES[body.serviceName];
+      if (!p) return NextResponse.json({ success: false, message: "Invalid service selected." }, { status: 400 });
+      correctAmount = p;
+    } else if (body.includeMembership) {
+      const p = MEMBER_PRICES[body.serviceName];
+      if (!p || body.serviceName === "Lifetime Membership") {
+        return NextResponse.json({ success: false, message: "Invalid service selected." }, { status: 400 });
+      }
+      correctAmount = p + 300000;
+      finalServiceName = `${body.serviceName} + Lifetime Membership`;
+    } else {
+      const p = NON_MEMBER_PRICES[body.serviceName] ?? MEMBER_PRICES[body.serviceName];
+      if (!p) return NextResponse.json({ success: false, message: "Invalid service selected." }, { status: 400 });
+      correctAmount = p;
     }
 
-    const razorpayOrder = await createRazorpayOrder(correctAmount, body.serviceName, user.userId);
+    const razorpayOrder = await createRazorpayOrder(correctAmount, finalServiceName, user.userId);
     if (!razorpayOrder) {
       return NextResponse.json({ success: false, message: "Failed to create payment order. Please try again." }, { status: 500 });
     }
@@ -77,7 +108,7 @@ export async function POST(req: NextRequest) {
     const db = getAdminClient();
     const { data: booking, error } = await db.from("bookings").insert({
       user_id: user.userId,
-      service_name: body.serviceName,
+      service_name: finalServiceName,
       booking_date: body.bookingDate,
       booking_time: body.bookingTime,
       payment_amount: correctAmount,
@@ -96,7 +127,7 @@ export async function POST(req: NextRequest) {
       booking: {
         id: booking.id,
         userId: booking.user_id,
-        serviceName: booking.service_name,
+        serviceName: finalServiceName,
         bookingDate: booking.booking_date,
         bookingTime: booking.booking_time,
         amount: booking.payment_amount,
