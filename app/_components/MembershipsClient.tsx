@@ -1504,7 +1504,7 @@ export default function MembershipsClient() {
         {/* ── Trust badges ── */}
         <FadeIn delay={0.1}>
           <div style={{ borderTop: "1px solid rgba(255,130,0,0.1)", paddingTop: "32px", marginTop: "40px", display: "flex", justifyContent: "center", alignItems: "center", gap: "48px", flexWrap: "wrap" as const }}>
-            {["No Joining Fee", "Cancel Anytime", "Women Only", "Secure Payments"].map((badge) => (
+            {["No Joining Fee", "Women Only", "Secure Payments"].map((badge) => (
               <div key={badge} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <span style={{ color: "#FF8200", fontSize: "14px" }}>✓</span>
                 <span style={{ fontFamily: "var(--font-display)", fontSize: "0.78rem", fontWeight: 600, letterSpacing: "0.12em", color: "rgba(245,240,235,0.6)" }}>{badge}</span>
