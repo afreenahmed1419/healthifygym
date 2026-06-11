@@ -716,6 +716,12 @@ const BRANCH_SLOTS: Record<BranchId, string[]> = {
     "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM",
   ],
 };
+
+// Yoga / Aerobics / Zumba has fixed class timings only
+const YOGA_BRANCH_SLOTS: Record<BranchId, string[]> = {
+  portblair:  ["5:30 PM"],
+  bambooflat: ["7:00 AM"],
+};
 const HAPPY_HOURS = new Set(["9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM"]);
 const GOALS = ["Weight Gain", "Muscle Building", "Flexibility", "General Fitness", "Weight Loss", "Strength Training", "Women Wellness"];
 const DAY_NAMES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -777,8 +783,8 @@ function isSlotPassed(slot: string, dateStr: string): boolean {
   return parseSlotMinutes(slot) <= currentMinutes + 30;
 }
 
-function firstAvailableSlot(branch: BranchId, dateStr: string): string {
-  const slots = BRANCH_SLOTS[branch];
+function firstAvailableSlot(branch: BranchId, dateStr: string, slotMap: Record<BranchId, string[]> = BRANCH_SLOTS): string {
+  const slots = slotMap[branch];
   return slots.find((s) => !isSlotPassed(s, dateStr)) ?? slots[slots.length - 1];
 }
 
@@ -791,10 +797,13 @@ function BookingSection({ selectedPlan, selectedIncludesMembership, isMember, pl
   planSelected: boolean;
   onChangePlan: () => void;
 }) {
+  const isYogaPlan = selectedPlan.startsWith("Yoga");
+  const activeSlots = isYogaPlan ? YOGA_BRANCH_SLOTS : BRANCH_SLOTS;
+
   const [days] = useState(() => generateNext7Days());
   const [selectedDay, setSelectedDay] = useState(days[0].dateStr);
   const [selectedBranch, setSelectedBranch] = useState<BranchId>("portblair");
-  const [selectedTime, setSelectedTime] = useState(() => firstAvailableSlot("portblair", days[0].dateStr));
+  const [selectedTime, setSelectedTime] = useState(() => firstAvailableSlot("portblair", days[0].dateStr, isYogaPlan ? YOGA_BRANCH_SLOTS : BRANCH_SLOTS));
 
   // Booking form
   const [bName, setBName] = useState("");
@@ -820,10 +829,10 @@ function BookingSection({ selectedPlan, selectedIncludesMembership, isMember, pl
 
   const selectedDayObj = days.find((d) => d.dateStr === selectedDay) ?? days[0];
 
-  // Auto-select first available slot when day or branch changes
+  // Auto-select first available slot when day, branch, or plan type changes
   useEffect(() => {
-    setSelectedTime(firstAvailableSlot(selectedBranch, selectedDay));
-  }, [selectedDay, selectedBranch]);
+    setSelectedTime(firstAvailableSlot(selectedBranch, selectedDay, activeSlots));
+  }, [selectedDay, selectedBranch, isYogaPlan]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleBook = async () => {
     const errs: Record<string, string> = {};
@@ -1029,7 +1038,7 @@ function BookingSection({ selectedPlan, selectedIncludesMembership, isMember, pl
                 return (
                   <button
                     key={b.id}
-                    onClick={() => { setSelectedBranch(b.id); setSelectedTime(firstAvailableSlot(b.id, selectedDay)); }}
+                    onClick={() => { setSelectedBranch(b.id); setSelectedTime(firstAvailableSlot(b.id, selectedDay, activeSlots)); }}
                     style={{ flex: 1, padding: "10px 16px", background: active ? "rgba(255,130,0,0.12)" : "#1A1A1A", border: `1px solid ${active ? "#FF8200" : "rgba(255,130,0,0.15)"}`, borderRadius: "4px", fontFamily: "var(--font-display)", fontSize: "12px", fontWeight: 700, letterSpacing: "0.1em", color: active ? "#FF8200" : "rgba(245,240,235,0.5)", cursor: "pointer", transition: "all 0.2s" }}
                   >
                     {b.label.toUpperCase()}
@@ -1038,17 +1047,19 @@ function BookingSection({ selectedPlan, selectedIncludesMembership, isMember, pl
               })}
             </div>
 
-            {/* Happy hours callout */}
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "rgba(74,222,128,0.07)", border: "1px solid rgba(74,222,128,0.25)", borderRadius: "6px", padding: "10px 14px", marginBottom: "14px" }}>
-              <span style={{ fontSize: "14px" }}>🎉</span>
-              <div className="rsp-happy-hours-text" style={{ display: "flex", alignItems: "baseline", gap: "0" }}>
-                <span style={{ fontFamily: "var(--font-display)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.14em", color: "#4ADE80" }}>HAPPY HOURS · 9:00 AM – 3:00 PM</span>
-                <span style={{ fontFamily: "var(--font-display)", fontSize: "10px", color: "rgba(74,222,128,0.7)", marginLeft: "10px", letterSpacing: "0.06em" }}>Flat ₹500 off on all plans</span>
+            {/* Happy hours callout — not applicable for yoga class timings */}
+            {!isYogaPlan && (
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "rgba(74,222,128,0.07)", border: "1px solid rgba(74,222,128,0.25)", borderRadius: "6px", padding: "10px 14px", marginBottom: "14px" }}>
+                <span style={{ fontSize: "14px" }}>🎉</span>
+                <div className="rsp-happy-hours-text" style={{ display: "flex", alignItems: "baseline", gap: "0" }}>
+                  <span style={{ fontFamily: "var(--font-display)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.14em", color: "#4ADE80" }}>HAPPY HOURS · 9:00 AM – 3:00 PM</span>
+                  <span style={{ fontFamily: "var(--font-display)", fontSize: "10px", color: "rgba(74,222,128,0.7)", marginLeft: "10px", letterSpacing: "0.06em" }}>Flat ₹500 off on all plans</span>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="rsp-timeslots" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px", marginBottom: "28px" }}>
-              {BRANCH_SLOTS[selectedBranch].map((slot) => {
+              {activeSlots[selectedBranch].map((slot) => {
                 const passed = isSlotPassed(slot, selectedDay);
                 const active = selectedTime === slot && !passed;
                 const happy = HAPPY_HOURS.has(slot) && !passed;
