@@ -1437,7 +1437,7 @@ export default function MembershipsClient() {
                 price={hasLifetime ? "₹200" : "₹250"}
                 priceColor="#F5F0EB"
                 priceLabel={hasLifetime ? "MEMBER PRICE · PER VISIT" : "PER VISIT · MEMBERS GET ₹200"}
-                desc={hasLifetime ? "Member benefit — drop in anytime at ₹200 per session. Full gym access for one hour." : "No commitment needed. Full gym access for one hour. Lifetime members get ₹200 rate."}
+                desc={hasLifetime ? "Full gym access for a single session at your exclusive member rate. No subscription required." : "Full gym access for a single session. No subscription required. Lifetime members enjoy ₹200 per visit."}
                 cta={<OutlineBtn onClick={() => selectPlan("Drop-In Pass (Daily)", false)}>BOOK DAY PASS →</OutlineBtn>}
               />
             </FadeIn>
