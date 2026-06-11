@@ -784,10 +784,11 @@ function firstAvailableSlot(branch: BranchId, dateStr: string): string {
 
 // ─── Booking Section ──────────────────────────────────────────────────────────
 
-function BookingSection({ selectedPlan, selectedIncludesMembership, isMember, onChangePlan }: {
+function BookingSection({ selectedPlan, selectedIncludesMembership, isMember, planSelected, onChangePlan }: {
   selectedPlan: string;
   selectedIncludesMembership: boolean;
   isMember: boolean;
+  planSelected: boolean;
   onChangePlan: () => void;
 }) {
   const [days] = useState(() => generateNext7Days());
@@ -955,10 +956,10 @@ function BookingSection({ selectedPlan, selectedIncludesMembership, isMember, on
         </motion.div>
 
         {/* Two-option grid */}
-        <div className="rsp-grid-1" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2px", maxWidth: "1100px", margin: "0 auto" }}>
+        <div className="rsp-grid-1" style={{ display: "grid", gridTemplateColumns: planSelected ? "1fr 1fr" : "1fr", gap: "2px", maxWidth: planSelected ? "1100px" : "600px", margin: "0 auto" }}>
 
           {/* ── Option A: Book Directly ── */}
-          <motion.div
+          {planSelected && <motion.div
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: false, amount: 0.05 }}
@@ -1172,7 +1173,7 @@ function BookingSection({ selectedPlan, selectedIncludesMembership, isMember, on
                 {bError && <p style={{ fontFamily: "var(--font-display)", fontSize: "11px", color: "rgba(255,80,80,0.8)", marginTop: "10px", textAlign: "center" }}>{bError}</p>}
               </>
             )}
-          </motion.div>
+          </motion.div>}
 
           {/* ── Option B: Visit Gym ── */}
           <motion.div
@@ -1317,6 +1318,7 @@ export default function MembershipsClient() {
   const { user } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState("Essential (Strength) — Monthly");
   const [selectedIncludesMembership, setSelectedIncludesMembership] = useState(false);
+  const [planSelected, setPlanSelected] = useState(false);
   const [modalPlan, setModalPlan] = useState<string | null>(null);
   const [activeMembership, setActiveMembership] = useState<ActiveMembership | null>(null);
   const [hasLifetime, setHasLifetime] = useState(false);
@@ -1342,6 +1344,7 @@ export default function MembershipsClient() {
   const selectPlan = (planName: string, includeMembership: boolean) => {
     setSelectedPlan(planName);
     setSelectedIncludesMembership(includeMembership);
+    setPlanSelected(true);
     setTimeout(() => {
       document.getElementById("booking-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 50);
@@ -1521,6 +1524,7 @@ export default function MembershipsClient() {
           selectedPlan={selectedPlan}
           selectedIncludesMembership={selectedIncludesMembership}
           isMember={hasLifetime}
+          planSelected={planSelected}
           onChangePlan={scrollToPricing}
         />
       )}
