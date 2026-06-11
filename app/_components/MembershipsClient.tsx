@@ -1516,12 +1516,14 @@ export default function MembershipsClient() {
       </div>
 
       {/* ── Booking Section ── */}
-      <BookingSection
-        selectedPlan={selectedPlan}
-        selectedIncludesMembership={selectedIncludesMembership}
-        isMember={hasLifetime}
-        onChangePlan={scrollToPricing}
-      />
+      {!hasActiveClassPlan && (
+        <BookingSection
+          selectedPlan={selectedPlan}
+          selectedIncludesMembership={selectedIncludesMembership}
+          isMember={hasLifetime}
+          onChangePlan={scrollToPricing}
+        />
+      )}
       <AnimatePresence>
         {modalPlan && (
           <DurationModal
