@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { NAV_LINKS, BRAND } from "@/lib/constants";
+import { NAV_LINKS } from "@/lib/constants";
 
 // ─── Logo ───────────────────────────────────────────────────────────────────
 
@@ -148,10 +148,10 @@ function MobileDrawer({
           {/* Footer */}
           <div className="shrink-0 px-5 pb-7 space-y-2.5"
             style={{ borderTop: "1px solid #141414", paddingTop: "18px" }}>
-            <a href={`tel:${BRAND.phone}`} className="mnav-phone"
+            <Link href="/contact" onClick={onClose} className="mnav-phone"
               style={{ fontFamily: "var(--font-display)" }}>
-              {BRAND.phone}
-            </a>
+              Contact Us →
+            </Link>
 
             <Link href="/memberships" onClick={onClose}
               className="mnav-cta" style={{ fontFamily: "var(--font-display)" }}>
@@ -256,13 +256,13 @@ export default function Navbar() {
 
             {/* Right: Phone + CTA */}
             <div className="hidden lg:flex items-center gap-3">
-              <a
-                href={`tel:${BRAND.phone}`}
-                className="text-[#aaa] text-[11px] tracking-widest hover:text-[#FF8200] transition-colors"
+              <Link
+                href="/contact"
+                className="text-[#aaa] text-[11px] tracking-widest uppercase hover:text-[#FF8200] transition-colors"
                 style={{ fontFamily: "var(--font-display)" }}
               >
-                {BRAND.phone}
-              </a>
+                Contact Us
+              </Link>
 
               {/* CTA — separated with a divider */}
               <div className="h-6 w-px bg-[#222]" />
