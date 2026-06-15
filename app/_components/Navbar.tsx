@@ -5,9 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/context/AuthContext";
 import { NAV_LINKS, BRAND } from "@/lib/constants";
-import OTPModal from "./OTPModal";
 
 // ─── Logo ───────────────────────────────────────────────────────────────────
 
@@ -25,16 +23,10 @@ function MobileDrawer({
   open,
   onClose,
   pathname,
-  user,
-  onLoginClick,
-  onLogout,
 }: {
   open: boolean;
   onClose: () => void;
   pathname: string;
-  user: ReturnType<typeof useAuth>["user"];
-  onLoginClick: () => void;
-  onLogout: () => void;
 }) {
   return (
     <AnimatePresence>
@@ -161,23 +153,6 @@ function MobileDrawer({
               {BRAND.phone}
             </a>
 
-            {user ? (
-              <>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: "9px", letterSpacing: "0.15em", color: "#3a3a3a" }}>
-                  Logged in as <span style={{ color: "#FF8200" }}>{user.whatsappNumber}</span>
-                </div>
-                <button onClick={() => { onLogout(); onClose(); }}
-                  className="mnav-btn" style={{ fontFamily: "var(--font-display)" }}>
-                  Logout
-                </button>
-              </>
-            ) : (
-              <button onClick={() => { onLoginClick(); onClose(); }}
-                className="mnav-btn" style={{ fontFamily: "var(--font-display)" }}>
-                Login / Sign Up
-              </button>
-            )}
-
             <Link href="/memberships" onClick={onClose}
               className="mnav-cta" style={{ fontFamily: "var(--font-display)" }}>
               Book a Class →
@@ -233,17 +208,9 @@ function NavLink({ href, active, children }: { href: string; active: boolean; ch
 // ─── Main Navbar ─────────────────────────────────────────────────────────────
 
 export default function Navbar() {
-  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [otpOpen, setOtpOpen] = useState(false);
-
-  useEffect(() => {
-    if (isLoading || isAuthenticated) return;
-    const timer = setTimeout(() => setOtpOpen(true), 600);
-    return () => clearTimeout(timer);
-  }, [isLoading, isAuthenticated]);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 50);
@@ -287,59 +254,15 @@ export default function Navbar() {
               })}
             </nav>
 
-            {/* Right: Phone + Auth + CTA */}
+            {/* Right: Phone + CTA */}
             <div className="hidden lg:flex items-center gap-3">
-              {isAuthenticated && user ? (
-                <div className="flex items-center gap-4">
-                  <span
-                    className="text-[#aaa] text-[11px] tracking-widest"
-                    style={{ fontFamily: "var(--font-display)" }}
-                  >
-                    {user.whatsappNumber}
-                  </span>
-                  <button
-                    onClick={logout}
-                    style={{
-                      fontFamily: "var(--font-display)",
-                      fontSize: "10px",
-                      fontWeight: "700",
-                      letterSpacing: "0.22em",
-                      textTransform: "uppercase",
-                      color: "#ffffff",
-                      background: "#080808",
-                      border: "1px solid #FF8200",
-                      padding: "0 24px",
-                      height: "42px",
-                      cursor: "pointer",
-                      borderRadius: "6px",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      whiteSpace: "nowrap",
-                      transition: "background 0.2s, color 0.2s",
-                    }}
-                  >
-                    Logout
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-5">
-                  <a
-                    href={`tel:${BRAND.phone}`}
-                    className="text-[#aaa] text-[11px] tracking-widest hover:text-[#FF8200] transition-colors"
-                    style={{ fontFamily: "var(--font-display)" }}
-                  >
-                    {BRAND.phone}
-                  </a>
-                  <button
-                    onClick={() => setOtpOpen(true)}
-                    className="text-[#aaa] hover:text-white text-[11px] tracking-widest uppercase transition-colors"
-                    style={{ fontFamily: "var(--font-display)" }}
-                  >
-                    Login
-                  </button>
-                </div>
-              )}
+              <a
+                href={`tel:${BRAND.phone}`}
+                className="text-[#aaa] text-[11px] tracking-widest hover:text-[#FF8200] transition-colors"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                {BRAND.phone}
+              </a>
 
               {/* CTA — separated with a divider */}
               <div className="h-6 w-px bg-[#222]" />
@@ -390,12 +313,7 @@ export default function Navbar() {
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
         pathname={pathname}
-        user={user}
-        onLoginClick={() => setOtpOpen(true)}
-        onLogout={logout}
       />
-
-      <OTPModal isOpen={otpOpen} onClose={() => setOtpOpen(false)} />
     </>
   );
 }

@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase";
-import { requireAuth } from "@/lib/api-auth";
 import { sanitizeString, sanitizePhone } from "@/lib/sanitize";
 
 export async function POST(req: NextRequest) {
   try {
-    const authResult = requireAuth(req);
-    if ("error" in authResult) return authResult.error;
-    const { user } = authResult;
-
     const raw = await req.json() as { name?: string; phone?: string; message?: string };
     const name = raw.name ? sanitizeString(raw.name) : undefined;
     const phone = raw.phone ? sanitizePhone(raw.phone) : undefined;
@@ -16,14 +11,11 @@ export async function POST(req: NextRequest) {
 
     const db = getAdminClient();
 
-    const { data: userData } = await db.from("users").select("*").eq("id", user.userId).single();
-    if (!userData) return NextResponse.json({ success: false, message: "User not found." }, { status: 404 });
-
-    const fullName = name || userData.name || null;
-    const whatsappNumber = phone || userData.whatsapp_number;
+    const fullName = name || null;
+    const whatsappNumber = phone || null;
 
     const { data: appointment, error } = await db.from("appointments").insert({
-      user_id: user.userId,
+      user_id: null,
       full_name: fullName,
       whatsapp_number: whatsappNumber,
       message: message ?? null,

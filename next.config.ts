@@ -18,7 +18,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https:",
-      "connect-src 'self' https://*.supabase.co https://www.fast2sms.com https://api.razorpay.com https://checkout.razorpay.com https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebaseinstallations.googleapis.com",
+      "connect-src 'self' https://*.supabase.co https://www.fast2sms.com https://api.razorpay.com https://checkout.razorpay.com",
       "frame-src https://checkout.razorpay.com https://api.razorpay.com https://www.google.com https://maps.google.com https://www.google.com/maps",
       "worker-src blob:",
     ].join("; "),

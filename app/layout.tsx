@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Bebas_Neue, Barlow_Condensed, Barlow } from "next/font/google";
 import "./globals.css";
 import dynamic from "next/dynamic";
-import { AuthProvider } from "@/context/AuthContext";
 import Navbar from "./_components/Navbar";
 import Footer from "./_components/Footer";
 import PageTransition from "./_components/PageTransition";
@@ -102,12 +101,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${geistSans.variable} ${bebasNeue.variable} ${barlowCondensed.variable} ${barlow.variable}`}>
       <body className="bg-[#0d0d0d] text-white antialiased">
         <StructuredData />
-        <AuthProvider>
-          <Navbar />
-          <PageTransition>{children}</PageTransition>
-          <Footer />
-          <ChatbotWidget />
-        </AuthProvider>
+        <Navbar />
+        <PageTransition>{children}</PageTransition>
+        <Footer />
+        <ChatbotWidget />
       </body>
     </html>
   );

@@ -6,9 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { SparklesCore } from "@/app/_components/SparklesCore";
-import OTPModal from "../_components/OTPModal";
 import HealthifyCard from "../_components/HealthifyCard";
-import { useAuth } from "@/context/AuthContext";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -1003,18 +1001,10 @@ function EquipmentMarqueeSection() {
 
 export default function ServicesClient() {
   const [activeCategory, setActiveCategory] = useState<Category>("All");
-  const [otpOpen, setOtpOpen] = useState(false);
-  const { isAuthenticated } = useAuth();
   const router = useRouter();
 
   const handleBook = () => {
-    if (isAuthenticated) {
-      // Already logged in — go straight to booking
-      router.push("/memberships#booking-section");
-    } else {
-      // Not logged in — verify first
-      handleBook();
-    }
+    router.push("/memberships#booking-section");
   };
 
   const filtered =
@@ -1375,9 +1365,6 @@ export default function ServicesClient() {
           </motion.div>
         </div>
       </section>
-
-      {/* ── OTP / Auth modal ── */}
-      <OTPModal isOpen={otpOpen} onClose={() => setOtpOpen(false)} />
     </main>
   );
 }

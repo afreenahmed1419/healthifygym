@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/lib/api-auth";
 import { verifyRazorpaySignature, verifyRazorpayWebhook } from "@/lib/razorpay.server";
 import { getAdminClient } from "@/lib/supabase";
 import { sendOwnerBookingNotification, sendUserBookingConfirmation } from "@/lib/msg91";
@@ -24,11 +23,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true });
   }
 
-  // ── Client-side verification ──────────────────────────────────────
-  const authResult = requireAuth(req);
-  if ("error" in authResult) return authResult.error;
-  const { user } = authResult;
-
+  // ── Client-side verification (guest checkout — secured by the Razorpay signature) ──
   const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = await req.json() as {
     razorpayOrderId: string;
     razorpayPaymentId: string;
@@ -39,23 +34,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, message: "Payment verification failed. Invalid signature." }, { status: 400 });
   }
 
-  // Verify the booking belongs to this authenticated user before confirming
-  const db = getAdminClient();
-  const { data: bookingCheck } = await db
-    .from("bookings")
-    .select("id, user_id")
-    .eq("razorpay_payment_id", razorpayOrderId)
-    .single();
-
-  if (!bookingCheck) {
-    return NextResponse.json({ success: false, message: "Booking not found." }, { status: 404 });
-  }
-
-  if (bookingCheck.user_id !== user.userId) {
-    return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 403 });
-  }
-
-  const booking = await confirmPayment(razorpayOrderId, razorpayPaymentId, null, "upi", user.userId);
+  // The booking already carries the user_id assigned at creation time
+  const booking = await confirmPayment(razorpayOrderId, razorpayPaymentId, null, "upi", null);
   if (!booking) {
     return NextResponse.json({ success: false, message: "Failed to confirm booking." }, { status: 500 });
   }

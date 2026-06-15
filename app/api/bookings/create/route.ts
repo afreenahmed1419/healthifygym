@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase";
-import { requireAuth } from "@/lib/api-auth";
 import { createRazorpayOrder } from "@/lib/razorpay.server";
-import { sanitizeString } from "@/lib/sanitize";
+import { sanitizeString, sanitizeEmail, sanitizePhone } from "@/lib/sanitize";
+import { validatePhoneNumber, formatIndianPhone } from "@/lib/auth";
 
 // Member prices in paise (₹ × 100)
 const MEMBER_PRICES: Record<string, number> = {
@@ -41,17 +41,15 @@ const NON_MEMBER_PRICES: Record<string, number> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const authResult = requireAuth(req);
-    if ("error" in authResult) return authResult.error;
-    const { user } = authResult;
-
     const raw = await req.json() as {
       serviceName: string;
       bookingDate: string;
       bookingTime: string;
-      amount: number;
+      userName?: string;
+      email?: string;
+      phone?: string;
       whatsappNumber?: string;
-      notes?: string;
+      goal?: string;
       isMember?: boolean;
       includeMembership?: boolean;
     };
@@ -60,12 +58,50 @@ export async function POST(req: NextRequest) {
       serviceName: sanitizeString(raw.serviceName),
       bookingDate: sanitizeString(raw.bookingDate),
       bookingTime: sanitizeString(raw.bookingTime),
-      amount: Number(raw.amount),
-      whatsappNumber: raw.whatsappNumber ? sanitizeString(raw.whatsappNumber) : undefined,
-      notes: raw.notes ? sanitizeString(raw.notes) : undefined,
+      userName: raw.userName ? sanitizeString(raw.userName) : undefined,
+      email: raw.email ? sanitizeEmail(raw.email) : undefined,
+      phone: raw.phone ? sanitizePhone(raw.phone) : undefined,
+      whatsappNumber: raw.whatsappNumber ? sanitizePhone(raw.whatsappNumber) : undefined,
+      goal: raw.goal ? sanitizeString(raw.goal) : undefined,
       isMember: !!raw.isMember,
       includeMembership: !!raw.includeMembership,
     };
+
+    // Guest checkout — identify the customer by phone instead of a login session
+    if (!body.phone || !validatePhoneNumber(body.phone)) {
+      return NextResponse.json({ success: false, message: "A valid phone number is required." }, { status: 400 });
+    }
+    const phoneE164 = formatIndianPhone(body.phone);
+
+    const db = getAdminClient();
+
+    // Create or reuse the user record keyed by phone number
+    const { data: existingUser } = await db
+      .from("users")
+      .select("id")
+      .eq("whatsapp_number", phoneE164)
+      .single();
+
+    let userId: string;
+    if (existingUser) {
+      userId = existingUser.id;
+      if (body.userName || body.email) {
+        await db.from("users").update({
+          ...(body.userName ? { name: body.userName } : {}),
+          ...(body.email ? { email: body.email } : {}),
+        }).eq("id", userId);
+      }
+    } else {
+      const { data: createdUser, error: createErr } = await db
+        .from("users")
+        .insert({ whatsapp_number: phoneE164, name: body.userName ?? null, email: body.email ?? null })
+        .select("id")
+        .single();
+      if (createErr || !createdUser) {
+        return NextResponse.json({ success: false, message: "Could not start your booking. Please try again." }, { status: 500 });
+      }
+      userId = createdUser.id;
+    }
 
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const bookingDate = new Date(body.bookingDate);
@@ -100,14 +136,13 @@ export async function POST(req: NextRequest) {
       correctAmount = p;
     }
 
-    const razorpayOrder = await createRazorpayOrder(correctAmount, finalServiceName, user.userId);
+    const razorpayOrder = await createRazorpayOrder(correctAmount, finalServiceName, userId);
     if (!razorpayOrder) {
       return NextResponse.json({ success: false, message: "Failed to create payment order. Please try again." }, { status: 500 });
     }
 
-    const db = getAdminClient();
     const { data: booking, error } = await db.from("bookings").insert({
-      user_id: user.userId,
+      user_id: userId,
       service_name: finalServiceName,
       booking_date: body.bookingDate,
       booking_time: body.bookingTime,
@@ -115,7 +150,7 @@ export async function POST(req: NextRequest) {
       razorpay_payment_id: razorpayOrder.id,
       payment_status: "pending",
       owner_notified: false,
-      notes: JSON.stringify({ whatsapp: body.whatsappNumber ?? null, extra: body.notes ?? null }),
+      notes: JSON.stringify({ whatsapp: body.whatsappNumber ?? null, extra: body.goal ?? null }),
     }).select().single();
 
     if (error || !booking) {

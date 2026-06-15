@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth } from "@/lib/api-auth";
 import { getAdminClient } from "@/lib/supabase";
+import { validatePhoneNumber, formatIndianPhone } from "@/lib/auth";
 
 function stripMembershipSuffix(name: string): string {
   return name.replace(" + Lifetime Membership", "");
@@ -19,15 +19,28 @@ function computeExpiry(serviceName: string, bookingDate: string): Date | null {
 }
 
 export async function GET(req: NextRequest) {
-  const authResult = requireAuth(req);
-  if ("error" in authResult) return authResult.error;
-  const { user } = authResult;
+  // Public, phone-keyed lookup — no login. The phone acts only as a lookup key.
+  const phoneParam = req.nextUrl.searchParams.get("phone") ?? "";
+  if (!validatePhoneNumber(phoneParam)) {
+    return NextResponse.json({ activeMembership: null, hasLifetime: false });
+  }
+  const phone = formatIndianPhone(phoneParam);
 
   const db = getAdminClient();
+  const { data: userRow } = await db
+    .from("users")
+    .select("id")
+    .eq("whatsapp_number", phone)
+    .single();
+
+  if (!userRow) {
+    return NextResponse.json({ activeMembership: null, hasLifetime: false });
+  }
+
   const { data: bookings } = await db
     .from("bookings")
     .select("id, service_name, booking_date, created_at")
-    .eq("user_id", user.userId)
+    .eq("user_id", userRow.id)
     .eq("payment_status", "completed")
     .neq("service_name", "Drop-In Pass (Daily)")
     .order("created_at", { ascending: false });

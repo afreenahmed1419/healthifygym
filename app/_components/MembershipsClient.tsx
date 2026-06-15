@@ -1,12 +1,11 @@
 ﻿"use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import apiClient from "@/lib/api-client";
 import { openRazorpayCheckout } from "@/lib/razorpay";
 import { validatePhoneNumber } from "@/lib/auth";
 import HealthifyCard from "../_components/HealthifyCard";
-import { useAuth } from "@/context/AuthContext";
 
 // ─── Hex grid SVG background ──────────────────────────────────────────────────
 
@@ -874,6 +873,8 @@ function BookingSection({ selectedPlan, selectedIncludesMembership, isMember, pl
             razorpayPaymentId: response.razorpay_payment_id,
             razorpaySignature: response.razorpay_signature,
           });
+          // Remember this buyer on this device so the membership page recognises them next time
+          try { localStorage.setItem("healthify_member", JSON.stringify({ phone: bPhone, plan: selectedPlan })); } catch { /* ignore */ }
           setBSuccess(true);
         },
         onDismiss: () => setBError("Payment cancelled."),
@@ -1326,7 +1327,6 @@ function BookingSection({ selectedPlan, selectedIncludesMembership, isMember, pl
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function MembershipsClient() {
-  const { user } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState("Essential (Strength) — Monthly");
   const [selectedIncludesMembership, setSelectedIncludesMembership] = useState(false);
   const [planSelected, setPlanSelected] = useState(false);
@@ -1334,18 +1334,49 @@ export default function MembershipsClient() {
   const [activeMembership, setActiveMembership] = useState<ActiveMembership | null>(null);
   const [hasLifetime, setHasLifetime] = useState(false);
 
+  // ── Member recognition without login (Option B: device memory + Option C: opt-in phone check) ──
+  const [checkOpen, setCheckOpen] = useState(false);
+  const [checkPhone, setCheckPhone] = useState("");
+  const [checking, setChecking] = useState(false);
+  const [checkError, setCheckError] = useState("");
+  const [notFound, setNotFound] = useState(false);
+
+  const lookupMembership = useCallback(async (phone: string, fromOptIn: boolean) => {
+    if (!validatePhoneNumber(phone)) {
+      if (fromOptIn) setCheckError("Enter a valid 10-digit mobile number.");
+      return;
+    }
+    if (fromOptIn) { setChecking(true); setCheckError(""); setNotFound(false); }
+    try {
+      const res = await fetch(`/api/memberships/active?phone=${encodeURIComponent(phone)}`);
+      const data = await res.json() as { activeMembership: ActiveMembership | null; hasLifetime: boolean };
+      const found = !!(data.activeMembership || data.hasLifetime);
+      setActiveMembership(data.activeMembership ?? null);
+      setHasLifetime(data.hasLifetime ?? false);
+      if (found) {
+        // Remember on this device so we recognise them automatically next time
+        try { localStorage.setItem("healthify_member", JSON.stringify({ phone })); } catch { /* ignore */ }
+        if (fromOptIn) setCheckOpen(false);
+      } else {
+        try { localStorage.removeItem("healthify_member"); } catch { /* ignore */ }
+        if (fromOptIn) setNotFound(true);
+      }
+    } catch {
+      if (fromOptIn) setCheckError("Could not check right now. Please try again.");
+    } finally {
+      if (fromOptIn) setChecking(false);
+    }
+  }, []);
+
+  // On load, if this device remembers a buyer, re-validate their plan against the DB
   useEffect(() => {
-    if (!user) return;
-    const token = localStorage.getItem("healthify_token");
-    if (!token) return;
-    fetch("/api/memberships/active", { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json())
-      .then((data: { activeMembership: ActiveMembership | null; hasLifetime: boolean }) => {
-        setActiveMembership(data.activeMembership ?? null);
-        setHasLifetime(data.hasLifetime ?? false);
-      })
-      .catch(() => { /* silently fail — show all plans */ });
-  }, [user]);
+    let phone = "";
+    try {
+      const raw = localStorage.getItem("healthify_member");
+      if (raw) phone = (JSON.parse(raw) as { phone?: string }).phone ?? "";
+    } catch { /* ignore */ }
+    if (phone) lookupMembership(phone, false);
+  }, [lookupMembership]);
 
   const activeCat = activeMembership ? getPlanCategory(activeMembership.serviceName) : null;
   const hasActiveClassPlan = activeCat === "essential" || activeCat === "yoga" || activeCat === "combo";
@@ -1399,6 +1430,64 @@ export default function MembershipsClient() {
             Transparent pricing with no joining fee, no hidden charges.<br />Find the plan that fits your goals.
           </p>
         </motion.div>
+
+        {/* ── Already a member? Opt-in plan check (no login) ── */}
+        {!activeMembership && (
+          <div style={{ maxWidth: "520px", margin: "0 auto 44px", textAlign: "center" }}>
+            {!checkOpen ? (
+              <button
+                onClick={() => { setCheckOpen(true); setNotFound(false); setCheckError(""); }}
+                style={{
+                  fontFamily: "var(--font-display)", fontSize: "12px", fontWeight: 700,
+                  letterSpacing: "0.16em", color: "#FF8200", background: "none", border: "none",
+                  cursor: "pointer", textDecoration: "underline", textUnderlineOffset: "4px",
+                }}
+              >
+                ALREADY A MEMBER? CHECK YOUR PLAN →
+              </button>
+            ) : (
+              <div>
+                <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    maxLength={10}
+                    value={checkPhone}
+                    onChange={(e) => { setCheckPhone(e.target.value.replace(/\D/g, "").slice(0, 10)); setCheckError(""); setNotFound(false); }}
+                    onKeyDown={(e) => { if (e.key === "Enter") lookupMembership(checkPhone, true); }}
+                    placeholder="Your 10-digit mobile number"
+                    autoFocus
+                    style={{
+                      width: "260px", maxWidth: "100%", padding: "12px 16px", borderRadius: "8px",
+                      border: "1px solid rgba(255,130,0,0.25)", background: "rgba(255,255,255,0.03)",
+                      color: "#F5F0EB", fontFamily: "var(--font-body)", fontSize: "0.9rem", outline: "none",
+                    }}
+                  />
+                  <button
+                    onClick={() => lookupMembership(checkPhone, true)}
+                    disabled={checking || checkPhone.length < 10}
+                    style={{
+                      padding: "12px 22px", borderRadius: "8px", border: "none", cursor: checking || checkPhone.length < 10 ? "not-allowed" : "pointer",
+                      fontFamily: "var(--font-display)", fontSize: "11px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase",
+                      background: checking || checkPhone.length < 10 ? "rgba(255,130,0,0.15)" : "#FF8200",
+                      color: checking || checkPhone.length < 10 ? "rgba(255,130,0,0.4)" : "#080808",
+                    }}
+                  >
+                    {checking ? "Checking…" : "Check"}
+                  </button>
+                </div>
+                {checkError && (
+                  <p style={{ color: "rgba(239,68,68,0.85)", fontSize: "0.75rem", marginTop: "10px", fontFamily: "var(--font-body)" }}>{checkError}</p>
+                )}
+                {notFound && (
+                  <p style={{ color: "rgba(245,240,235,0.5)", fontSize: "0.78rem", marginTop: "10px", fontFamily: "var(--font-body)" }}>
+                    No active membership found for that number. You can pick a plan below.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ── Active member banner ── */}
         {activeMembership && <ActiveMemberBanner membership={activeMembership} />}
