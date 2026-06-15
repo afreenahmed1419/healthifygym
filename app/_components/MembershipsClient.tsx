@@ -187,6 +187,13 @@ function DurationModal({
   const withoutStr = selectedOpt.nonMemberPrice ?? selectedOpt.memberPrice;
   const savings = withoutTotal - withTotal;
 
+  // For monthly plans the non-member rate looks cheaper per month, but the per-month gap
+  // accumulates past the one-time membership fee — surface when that break-even hits.
+  const monthlyExtra = selectedOpt.label.includes("Monthly") && selectedOpt.nonMemberPricePaise != null
+    ? (selectedOpt.nonMemberPricePaise - selectedOpt.memberPricePaise) / 100
+    : 0;
+  const monthlyBreakEven = monthlyExtra > 0 ? Math.ceil(MEMBERSHIP_FEE / monthlyExtra) : 0;
+
   const handleStep1Continue = () => {
     if (hasLifetime) {
       onConfirm(selectedName, false);
@@ -342,6 +349,9 @@ function DurationModal({
                   {[
                     "One-time payment of ₹3,000 — never expires",
                     savings > 0 ? `${selectedOpt.label} plan saves you ${inr(savings)} right away with membership` : "Half Yearly & Yearly plans offer big savings with membership",
+                    ...(monthlyBreakEven > 0
+                      ? [`Renewing Monthly without membership costs ${inr(monthlyExtra)} more each month than the member rate — over ${monthlyBreakEven} months that's more than the one-time ₹3,000 membership`]
+                      : []),
                     "Drop-in pass: ₹200 for members (non-members pay ₹250)",
                     "Recommended if you plan to train for 6 months or more",
                   ].map((pt, i) => (
