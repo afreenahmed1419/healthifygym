@@ -252,7 +252,7 @@ function DurationModal({
                     </div>
                     <span style={{ fontFamily: "var(--font-bebas)", fontSize: "1.15rem",
                       color: active ? "#FF8200" : "rgba(245,240,235,0.5)", letterSpacing: "0.04em" }}>
-                      {opt.nonMemberPrice ?? opt.memberPrice}
+                      {hasLifetime ? opt.memberPrice : (opt.nonMemberPrice ?? opt.memberPrice)}
                     </span>
                   </div>
                 );
@@ -541,27 +541,30 @@ function SectionLabel({ title, subtitle, subtitleOrange }: { title: string; subt
 
 // ─── Pricing table ────────────────────────────────────────────────────────────
 
-function PricingTable({ rows }: { rows: typeof ESSENTIAL_ROWS }) {
+function PricingTable({ rows, memberOnly }: { rows: typeof ESSENTIAL_ROWS; memberOnly?: boolean }) {
+  const cols = memberOnly ? "1.2fr 1fr" : "1.2fr 1fr 1fr";
   return (
     <div>
       {/* Header — hidden on mobile */}
-      <div className="mem-table-header" style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", background: "rgba(255,130,0,0.1)", border: "1px solid rgba(255,130,0,0.2)", padding: "14px 24px", marginBottom: "2px", borderRadius: "8px 8px 0 0", alignItems: "center" }}>
+      <div className="mem-table-header" style={{ display: "grid", gridTemplateColumns: cols, background: "rgba(255,130,0,0.1)", border: "1px solid rgba(255,130,0,0.2)", padding: "14px 24px", marginBottom: "2px", borderRadius: "8px 8px 0 0", alignItems: "center" }}>
         <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.18em", color: "#FF8200" }}>SUBSCRIPTION TYPE</span>
-        <div style={{ textAlign: "center" }}>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.18em", color: "#FF8200" }}>MEMBER</span>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: "11px", fontWeight: 400, color: "rgba(255,130,0,0.6)", letterSpacing: "0.08em", marginTop: "3px" }}>existing member</div>
+        <div style={{ textAlign: memberOnly ? "right" : "center" }}>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.18em", color: "#FF8200" }}>{memberOnly ? "YOUR PRICE" : "MEMBER"}</span>
+          <div style={{ fontFamily: "var(--font-display)", fontSize: "11px", fontWeight: 400, color: "rgba(255,130,0,0.6)", letterSpacing: "0.08em", marginTop: "3px" }}>{memberOnly ? "lifetime member rate" : "existing member"}</div>
         </div>
-        <div style={{ textAlign: "right" }}>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.18em", color: "rgba(245,240,235,0.6)" }}>NON-MEMBER</span>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: "11px", fontWeight: 400, color: "rgba(245,240,235,0.35)", letterSpacing: "0.08em", marginTop: "3px" }}>new joinee</div>
-        </div>
+        {!memberOnly && (
+          <div style={{ textAlign: "right" }}>
+            <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.18em", color: "rgba(245,240,235,0.6)" }}>NON-MEMBER</span>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "11px", fontWeight: 400, color: "rgba(245,240,235,0.35)", letterSpacing: "0.08em", marginTop: "3px" }}>new joinee</div>
+          </div>
+        )}
       </div>
       {/* Rows */}
       {rows.map((row, i) => (
         <div
           key={row.type}
           className="mem-table-row"
-          style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", padding: "18px 24px", borderBottom: i < rows.length - 1 ? "1px solid rgba(255,130,0,0.07)" : "none", background: i % 2 === 0 ? "rgba(255,130,0,0.03)" : "rgba(255,255,255,0.01)", borderRadius: i === rows.length - 1 ? "0 0 8px 8px" : 0, alignItems: "center" }}
+          style={{ display: "grid", gridTemplateColumns: cols, padding: "18px 24px", borderBottom: i < rows.length - 1 ? "1px solid rgba(255,130,0,0.07)" : "none", background: i % 2 === 0 ? "rgba(255,130,0,0.03)" : "rgba(255,255,255,0.01)", borderRadius: i === rows.length - 1 ? "0 0 8px 8px" : 0, alignItems: "center" }}
         >
           <div className="mem-col-type" style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
             <span style={{ fontFamily: "var(--font-display)", fontSize: "1rem", fontWeight: 500, color: "rgba(245,240,235,0.75)", letterSpacing: "0.04em" }}>{row.type}</span>
@@ -573,12 +576,14 @@ function PricingTable({ rows }: { rows: typeof ESSENTIAL_ROWS }) {
           </div>
           {/* display:contents makes children behave as direct grid items on desktop */}
           <div className="mem-prices-group" style={{ display: "contents" }}>
-            <span className="mem-col-member" style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, color: "#FF8200", textAlign: "center", letterSpacing: "0.02em" }}>
+            <span className="mem-col-member" style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, color: "#FF8200", textAlign: memberOnly ? "right" : "center", letterSpacing: "0.02em" }}>
               {inr(row.member)}
             </span>
-            <span className="mem-col-nonmember" style={{ fontFamily: "var(--font-display)", fontSize: "1rem", fontWeight: 500, color: "rgba(245,240,235,0.4)", textAlign: "right", letterSpacing: "0.02em" }}>
-              {row.nonMember != null ? inr(row.nonMember) : "—"}
-            </span>
+            {!memberOnly && (
+              <span className="mem-col-nonmember" style={{ fontFamily: "var(--font-display)", fontSize: "1rem", fontWeight: 500, color: "rgba(245,240,235,0.4)", textAlign: "right", letterSpacing: "0.02em" }}>
+                {row.nonMember != null ? inr(row.nonMember) : "—"}
+              </span>
+            )}
           </div>
         </div>
       ))}
@@ -588,30 +593,35 @@ function PricingTable({ rows }: { rows: typeof ESSENTIAL_ROWS }) {
 
 // ─── Yoga table ───────────────────────────────────────────────────────────────
 
-function YogaTable({ rows }: { rows: typeof YOGA_ROWS }) {
+function YogaTable({ rows, memberOnly }: { rows: typeof YOGA_ROWS; memberOnly?: boolean }) {
+  const cols = memberOnly ? "1.2fr 1fr" : "1.2fr 1fr 1fr";
   return (
     <div>
-      <div className="mem-table-header" style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", background: "rgba(255,130,0,0.1)", border: "1px solid rgba(255,130,0,0.2)", padding: "14px 24px", marginBottom: "2px", borderRadius: "8px 8px 0 0", alignItems: "center" }}>
+      <div className="mem-table-header" style={{ display: "grid", gridTemplateColumns: cols, background: "rgba(255,130,0,0.1)", border: "1px solid rgba(255,130,0,0.2)", padding: "14px 24px", marginBottom: "2px", borderRadius: "8px 8px 0 0", alignItems: "center" }}>
         <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.18em", color: "#FF8200" }}>SUBSCRIPTION TYPE</span>
-        <div style={{ textAlign: "center" }}>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.18em", color: "#FF8200" }}>MEMBER</span>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: "11px", fontWeight: 400, color: "rgba(255,130,0,0.6)", letterSpacing: "0.08em", marginTop: "3px" }}>existing member</div>
+        <div style={{ textAlign: memberOnly ? "right" : "center" }}>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.18em", color: "#FF8200" }}>{memberOnly ? "YOUR PRICE" : "MEMBER"}</span>
+          <div style={{ fontFamily: "var(--font-display)", fontSize: "11px", fontWeight: 400, color: "rgba(255,130,0,0.6)", letterSpacing: "0.08em", marginTop: "3px" }}>{memberOnly ? "lifetime member rate" : "existing member"}</div>
         </div>
-        <div style={{ textAlign: "right" }}>
-          <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.18em", color: "rgba(245,240,235,0.6)" }}>NON-MEMBER</span>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: "11px", fontWeight: 400, color: "rgba(245,240,235,0.35)", letterSpacing: "0.08em", marginTop: "3px" }}>new joinee</div>
-        </div>
+        {!memberOnly && (
+          <div style={{ textAlign: "right" }}>
+            <span style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.18em", color: "rgba(245,240,235,0.6)" }}>NON-MEMBER</span>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "11px", fontWeight: 400, color: "rgba(245,240,235,0.35)", letterSpacing: "0.08em", marginTop: "3px" }}>new joinee</div>
+          </div>
+        )}
       </div>
       {rows.map((row, i) => (
         <div
           key={row.type}
           className="mem-table-row"
-          style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", padding: "18px 24px", borderBottom: i < rows.length - 1 ? "1px solid rgba(255,130,0,0.07)" : "none", background: i % 2 === 0 ? "rgba(255,130,0,0.03)" : "rgba(255,255,255,0.01)", borderRadius: i === rows.length - 1 ? "0 0 8px 8px" : 0, alignItems: "center" }}
+          style={{ display: "grid", gridTemplateColumns: cols, padding: "18px 24px", borderBottom: i < rows.length - 1 ? "1px solid rgba(255,130,0,0.07)" : "none", background: i % 2 === 0 ? "rgba(255,130,0,0.03)" : "rgba(255,255,255,0.01)", borderRadius: i === rows.length - 1 ? "0 0 8px 8px" : 0, alignItems: "center" }}
         >
           <span className="mem-col-type" style={{ fontFamily: "var(--font-display)", fontSize: "1rem", fontWeight: 500, color: "rgba(245,240,235,0.75)", letterSpacing: "0.04em" }}>{row.type}</span>
           <div className="mem-prices-group" style={{ display: "contents" }}>
-            <span className="mem-col-member" style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, color: "#FF8200", textAlign: "center", letterSpacing: "0.02em" }}>{inr(row.member)}</span>
-            <span className="mem-col-nonmember" style={{ fontFamily: "var(--font-display)", fontSize: "1rem", fontWeight: 500, color: "rgba(245,240,235,0.4)", textAlign: "right", letterSpacing: "0.02em" }}>{inr(row.nonMember)}</span>
+            <span className="mem-col-member" style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", fontWeight: 700, color: "#FF8200", textAlign: memberOnly ? "right" : "center", letterSpacing: "0.02em" }}>{inr(row.member)}</span>
+            {!memberOnly && (
+              <span className="mem-col-nonmember" style={{ fontFamily: "var(--font-display)", fontSize: "1rem", fontWeight: 500, color: "rgba(245,240,235,0.4)", textAlign: "right", letterSpacing: "0.02em" }}>{inr(row.nonMember)}</span>
+            )}
           </div>
         </div>
       ))}
@@ -1565,7 +1575,7 @@ export default function MembershipsClient() {
             <div style={{ maxWidth: "740px", margin: "0 auto 20px" }}>
               <HealthifyCard>
                 <div className="rsp-pricing-wrap" style={{ padding: "36px" }}>
-                  <PricingTable rows={ESSENTIAL_ROWS} />
+                  <PricingTable rows={ESSENTIAL_ROWS} memberOnly={hasLifetime} />
                 </div>
               </HealthifyCard>
             </div>
@@ -1582,7 +1592,7 @@ export default function MembershipsClient() {
             <div style={{ maxWidth: "740px", margin: "0 auto 20px" }}>
               <HealthifyCard>
                 <div className="rsp-pricing-wrap" style={{ padding: "36px" }}>
-                  <YogaTable rows={YOGA_ROWS} />
+                  <YogaTable rows={YOGA_ROWS} memberOnly={hasLifetime} />
                 </div>
               </HealthifyCard>
             </div>
