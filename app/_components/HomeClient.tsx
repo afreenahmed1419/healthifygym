@@ -453,8 +453,8 @@ function MembershipTeaser() {
           </div>
 
           <h2 style={{ fontFamily: "var(--font-bebas)", fontSize: "clamp(3rem, 6vw, 5.5rem)", lineHeight: 0.95, textAlign: "center", marginBottom: "16px" }}>
-            <span style={{ color: "#F5F0EB" }}>REAL WOMEN.<br />REAL </span>
-            <span style={{ color: "#FF8200", textShadow: "0 0 30px rgba(255,130,0,0.3)" }}>RESULTS.</span>
+            <span style={{ color: "#F5F0EB" }}>WHAT OUR<br />MEMBERS </span>
+            <span style={{ color: "#FF8200", textShadow: "0 0 30px rgba(255,130,0,0.3)" }}>SAY.</span>
           </h2>
 
           <p style={{ fontFamily: "var(--font-body)", fontSize: "1rem", fontWeight: 300, color: "rgba(245,240,235,0.45)", textAlign: "center" }}>
