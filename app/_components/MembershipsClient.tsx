@@ -830,6 +830,7 @@ function BookingSection({ selectedPlan, selectedIncludesMembership, isMember, pl
   const [bPhone, setBPhone] = useState("");
   const [bWhatsapp, setBWhatsapp] = useState("");
   const [bGoal, setBGoal] = useState("Weight Gain");
+  const [bCompany, setBCompany] = useState(""); // honeypot — must stay empty
   const [bErrors, setBErrors] = useState<Record<string, string>>({});
   const [bLoading, setBLoading] = useState(false);
   const [bSuccess, setBSuccess] = useState(false);
@@ -839,6 +840,7 @@ function BookingSection({ selectedPlan, selectedIncludesMembership, isMember, pl
   const [vName, setVName] = useState("");
   const [vPhone, setVPhone] = useState("");
   const [vDate, setVDate] = useState("");
+  const [vCompany, setVCompany] = useState(""); // honeypot — must stay empty
   const [vErrors, setVErrors] = useState<Record<string, string>>({});
   const [vLoading, setVLoading] = useState(false);
   const [vSuccess, setVSuccess] = useState(false);
@@ -878,6 +880,7 @@ function BookingSection({ selectedPlan, selectedIncludesMembership, isMember, pl
         goal: bGoal,
         isMember,
         includeMembership: selectedIncludesMembership,
+        company: bCompany,
       });
       const { razorpayOrder } = res.data;
 
@@ -922,6 +925,7 @@ function BookingSection({ selectedPlan, selectedIncludesMembership, isMember, pl
         phone: vPhone,
         preferredDate: vDate,
         message: `I would like to visit the gym${vDate ? ` on ${vDate}` : ""}`,
+        company: vCompany,
       });
       const { appointment } = res.data;
       if (appointment?.whatsappLink) window.open(appointment.whatsappLink, "_blank");
@@ -1106,6 +1110,17 @@ function BookingSection({ selectedPlan, selectedIncludesMembership, isMember, pl
 
             {/* Booking form */}
             <div className="rsp-grid-1" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "20px" }}>
+              {/* Honeypot — hidden from people, bots fill it and get rejected */}
+              <input
+                type="text"
+                name="company"
+                value={bCompany}
+                onChange={(e) => setBCompany(e.target.value)}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", opacity: 0, pointerEvents: "none" }}
+              />
               <div style={{ gridColumn: "1 / -1" }}>
                 <label style={labelStyle}>FULL NAME</label>
                 <input
@@ -1261,6 +1276,17 @@ function BookingSection({ selectedPlan, selectedIncludesMembership, isMember, pl
 
             {/* Visit form */}
             <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "24px" }}>
+              {/* Honeypot — hidden from people, bots fill it and get rejected */}
+              <input
+                type="text"
+                name="company"
+                value={vCompany}
+                onChange={(e) => setVCompany(e.target.value)}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", opacity: 0, pointerEvents: "none" }}
+              />
               <div>
                 <label style={labelStyle}>YOUR NAME</label>
                 <input

@@ -725,6 +725,85 @@ function CTABanner() {
   );
 }
 
+// ─── Pricing teaser ──────────────────────────────────────────────────────────
+
+const PLAN_TEASERS = [
+  { name: "ESSENTIAL", sub: "Strength Training", price: "₹3,000", unit: "/mo", featured: false },
+  { name: "YOGA · ZUMBA", sub: "Aerobics & Group Classes", price: "₹3,000", unit: "/mo", featured: true },
+  { name: "COMBO", sub: "Strength + Zumba / Aerobics", price: "₹5,000", unit: "/mo", featured: false },
+];
+
+function PricingTeaser() {
+  return (
+    <section className="rsp-section" style={{ background: "transparent", padding: "80px 80px", position: "relative" }}>
+      <div style={{ position: "relative", zIndex: 1 }}>
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 30, filter: "blur(6px)" }}
+          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          viewport={{ once: false, amount: 0.3 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+          style={{ textAlign: "center", marginBottom: "56px" }}
+        >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", marginBottom: "20px" }}>
+            <div style={{ width: "40px", height: "1px", background: "#FF8200", opacity: 0.4 }} />
+            <span style={{ fontFamily: "var(--font-display)", fontSize: "10px", fontWeight: 600, letterSpacing: "0.3em", color: "#FF8200" }}>MEMBERSHIP PLANS</span>
+            <div style={{ width: "40px", height: "1px", background: "#FF8200", opacity: 0.4 }} />
+          </div>
+          <h2 style={{ fontFamily: "var(--font-bebas)", fontSize: "clamp(3rem, 6vw, 5.5rem)", lineHeight: 0.95, marginBottom: "16px" }}>
+            <span style={{ color: "#F5F0EB" }}>SIMPLE, </span>
+            <span style={{ color: "#FF8200", textShadow: "0 0 30px rgba(255,130,0,0.3)" }}>TRANSPARENT PRICING.</span>
+          </h2>
+          <p style={{ fontFamily: "var(--font-body)", fontSize: "1rem", fontWeight: 300, color: "rgba(245,240,235,0.45)" }}>
+            No joining fee, no hidden charges. Pick the plan that fits your goals.
+          </p>
+        </motion.div>
+
+        {/* Plan cards */}
+        <div className="rsp-grid-1" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px", maxWidth: "1000px", margin: "0 auto" }}>
+          {PLAN_TEASERS.map((p, i) => (
+            <Reveal key={p.name} delay={i * 0.12} stretch>
+              <motion.div whileHover={{ y: -6 }} transition={{ duration: 0.3, ease: "easeOut" }} style={{ height: "100%" }}>
+                <HealthifyCard style={{ height: "100%", ...(p.featured ? { border: "1px solid rgba(255,130,0,0.4)" } : {}) }}>
+                  <div style={{ padding: "36px 32px", position: "relative", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+                    {p.featured && (
+                      <div style={{ position: "absolute", top: 16, right: 16, background: "#FF8200", color: "#080808", fontFamily: "var(--font-display)", fontSize: "8px", fontWeight: 700, letterSpacing: "0.14em", padding: "4px 10px", borderRadius: 4 }}>POPULAR</div>
+                    )}
+                    <h3 style={{ fontFamily: "var(--font-bebas)", fontSize: "1.9rem", color: "#F5F0EB", letterSpacing: "0.04em", marginBottom: "6px" }}>{p.name}</h3>
+                    <p style={{ fontFamily: "var(--font-display)", fontSize: "0.7rem", fontWeight: 600, letterSpacing: "0.12em", color: "rgba(255,130,0,0.7)", textTransform: "uppercase", marginBottom: "24px" }}>{p.sub}</p>
+                    <span style={{ fontFamily: "var(--font-display)", fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.18em", color: "rgba(245,240,235,0.4)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>Starting from</span>
+                    <div>
+                      <span style={{ fontFamily: "var(--font-bebas)", fontSize: "3rem", color: "#FF8200", lineHeight: 1 }}>{p.price}</span>
+                      <span style={{ fontFamily: "var(--font-display)", fontSize: "0.9rem", color: "rgba(245,240,235,0.5)" }}>{p.unit}</span>
+                    </div>
+                  </div>
+                </HealthifyCard>
+              </motion.div>
+            </Reveal>
+          ))}
+        </div>
+
+        {/* Drop-in note + CTA */}
+        <div style={{ textAlign: "center", marginTop: "40px" }}>
+          <p style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", fontWeight: 300, color: "rgba(245,240,235,0.4)", marginBottom: "24px" }}>
+            Just visiting? Grab a Drop-In Pass for ₹250/visit.
+          </p>
+          <Link href="/memberships" style={{ textDecoration: "none" }}>
+            <motion.button
+              whileHover={{ scale: 1.04, boxShadow: "0 8px 40px rgba(255,130,0,0.5)" }}
+              whileTap={{ scale: 0.97 }}
+              style={{ fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "#080808", background: "#FF8200", border: "none", padding: "16px 40px", cursor: "pointer", borderRadius: "8px", display: "inline-flex", alignItems: "center", gap: "10px" }}
+            >
+              VIEW ALL PLANS &amp; PRICING
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#080808" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </motion.button>
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ─── Hero switcher — mounts only the correct hero to prevent GSAP pin bleed ──
 
 function HeroSwitcher() {
@@ -770,6 +849,7 @@ export default function HomeClient() {
         <JourneySwitcher />
         <WhyHealthify />
         <ServiceCarousel />
+        <PricingTeaser />
         <MembershipTeaser />
         <TransformationsTeaser />
         <CTABanner />

@@ -52,7 +52,13 @@ export async function POST(req: NextRequest) {
       goal?: string;
       isMember?: boolean;
       includeMembership?: boolean;
+      company?: string;
     };
+
+    // Honeypot — a hidden field humans never see; if it's filled, it's a bot.
+    if (typeof raw.company === "string" && raw.company.trim() !== "") {
+      return NextResponse.json({ success: false, message: "Invalid submission." }, { status: 400 });
+    }
 
     const body = {
       serviceName: sanitizeString(raw.serviceName),

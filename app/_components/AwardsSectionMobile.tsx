@@ -1,5 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function AwardsSectionMobile() {
   return (
@@ -32,10 +33,9 @@ export default function AwardsSectionMobile() {
           {/* Photo + nameplate — centred */}
           <div style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
             <div style={{ width: "130px" }}>
-              <div style={{ border: "2px solid rgba(255,150,0,0.4)", borderRadius: "8px 8px 0 0", overflow: "hidden" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/aurshia.png" alt="Aurshia Tahir, founder of Healthify women’s fitness club in Sri Vijaya Puram"
-                  style={{ width: "100%", height: "160px", objectFit: "cover", objectPosition: "top center", display: "block" }} />
+              <div style={{ border: "2px solid rgba(255,150,0,0.4)", borderRadius: "8px 8px 0 0", overflow: "hidden", position: "relative", height: "160px" }}>
+                <Image src="/images/aurshia.png" alt="Aurshia Tahir, founder of Healthify women’s fitness club in Sri Vijaya Puram"
+                  fill sizes="130px" style={{ objectFit: "cover", objectPosition: "top center" }} />
               </div>
               <div style={{ background: "#FF8200", padding: "7px 10px", textAlign: "center", borderRadius: "0 0 8px 8px" }}>
                 <div style={{ fontFamily: "var(--font-bebas)", fontSize: "1rem", color: "#080808", letterSpacing: "0.04em", lineHeight: 1 }}>Aurshia Tahir</div>

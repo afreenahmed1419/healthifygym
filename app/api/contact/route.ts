@@ -50,6 +50,11 @@ export async function POST(req: NextRequest) {
 
     const raw = await req.json();
 
+    // Honeypot — a hidden field humans never see; if it's filled, it's a bot.
+    if (typeof raw.company === "string" && raw.company.trim() !== "") {
+      return NextResponse.json({ success: true, message: "Message received. We'll reach out on WhatsApp shortly." });
+    }
+
     // Sanitize all inputs
     const name = sanitizeString(raw.name);
     const whatsappNumber = sanitizePhone(raw.whatsappNumber);

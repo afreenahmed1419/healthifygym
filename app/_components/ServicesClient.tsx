@@ -849,12 +849,12 @@ function GymEquipmentMarqueeSection() {
                 background: "#111",
               }}
             >
-              <img
+              <Image
                 src={src}
                 alt={`Strength training equipment at Healthify gym in Sri Vijaya Puram, view ${(i % EQUIPMENT_IMAGES.length) + 1}`}
-                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                loading="eager"
-                decoding="async"
+                fill
+                sizes="320px"
+                style={{ objectFit: "cover" }}
               />
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 60%, rgba(8,8,8,0.6) 100%)", pointerEvents: "none" }} />
               <div style={{ position: "absolute", top: 0, left: 0, width: 3, height: 40, background: "linear-gradient(to bottom, #FF8200, transparent)" }} />
@@ -977,12 +977,12 @@ function EquipmentMarqueeSection() {
                 background: "#111",
               }}
             >
-              <img
+              <Image
                 src={product.src}
                 alt={`${product.label} — available to Healthify members in Sri Vijaya Puram`}
-                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                loading="eager"
-                decoding="async"
+                fill
+                sizes="260px"
+                style={{ objectFit: "cover" }}
               />
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 50%, rgba(8,8,8,0.88) 100%)", pointerEvents: "none" }} />
               <div style={{ position: "absolute", top: 0, left: 0, width: 3, height: 40, background: "linear-gradient(to bottom, #FF8200, transparent)" }} />

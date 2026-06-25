@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import dynamic from "next/dynamic";
 import HealthifyCard from "@/app/_components/HealthifyCard";
 import AwardsSectionMobile from "@/app/_components/AwardsSectionMobile";
@@ -287,8 +288,8 @@ function AwardsSection() {
                 <LaurelIcon flip />
               </div>
               <div style={{ width: "190px" }}>
-                <div style={{ border: "2px solid rgba(255,150,0,0.4)", borderRadius: "10px 10px 0 0", overflow: "hidden" }}>
-                  <img src="/images/aurshia.png" alt="Aurshia Tahir, founder of Healthify women’s fitness club in Sri Vijaya Puram" style={{ width: "100%", height: "220px", display: "block", objectFit: "cover", objectPosition: "top center" }} />
+                <div style={{ border: "2px solid rgba(255,150,0,0.4)", borderRadius: "10px 10px 0 0", overflow: "hidden", position: "relative", height: "220px" }}>
+                  <Image src="/images/aurshia.png" alt="Aurshia Tahir, founder of Healthify women’s fitness club in Sri Vijaya Puram" fill sizes="190px" style={{ objectFit: "cover", objectPosition: "top center" }} />
                 </div>
                 <div style={{ background: "#FF8200", padding: "10px 16px", textAlign: "center" }}>
                   <div style={{ fontFamily: "var(--font-bebas)", fontSize: "1.25rem", color: "#080808", letterSpacing: "0.05em", lineHeight: 1 }}>Aurshia Tahir</div>
@@ -351,9 +352,10 @@ function TrainersSection() {
                   <div className="rsp-trainer-inner" style={{ display: "grid", gridTemplateColumns: "220px 1fr", height: "100%" }}>
 
                   {/* Photo */}
-                  <div style={{ position: "relative", overflow: "hidden" }}>
-                    <img src={trainer.image} alt={`${trainer.name}, trainer at Healthify women’s gym in Sri Vijaya Puram`}
-                      style={{ width: "100%", height: "100%", minHeight: "280px", objectFit: "cover", objectPosition: "top center", display: "block" }} />
+                  <div style={{ position: "relative", overflow: "hidden", minHeight: "280px" }}>
+                    <Image src={trainer.image} alt={`${trainer.name}, trainer at Healthify women’s gym in Sri Vijaya Puram`}
+                      fill sizes="(max-width: 767px) 100vw, 220px"
+                      style={{ objectFit: "cover", objectPosition: "top center" }} />
                     <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: "60px", background: "linear-gradient(to right, transparent, #120F17)" }} />
                   </div>
 

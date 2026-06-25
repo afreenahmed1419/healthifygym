@@ -4,7 +4,13 @@ import { sanitizeString, sanitizePhone } from "@/lib/sanitize";
 
 export async function POST(req: NextRequest) {
   try {
-    const raw = await req.json() as { name?: string; phone?: string; message?: string };
+    const raw = await req.json() as { name?: string; phone?: string; message?: string; company?: string };
+
+    // Honeypot — a hidden field humans never see; if it's filled, it's a bot. Pretend success.
+    if (typeof raw.company === "string" && raw.company.trim() !== "") {
+      return NextResponse.json({ success: true, appointment: { id: "ok" } }, { status: 201 });
+    }
+
     const name = raw.name ? sanitizeString(raw.name) : undefined;
     const phone = raw.phone ? sanitizePhone(raw.phone) : undefined;
     const message = raw.message ? sanitizeString(raw.message) : undefined;
