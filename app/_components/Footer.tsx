@@ -130,7 +130,7 @@ export default function Footer() {
           </div>
 
           <p style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", fontWeight: 300, color: "rgba(245,240,235,0.45)", lineHeight: 1.8, marginTop: "20px", maxWidth: "280px" }}>
-            Empowering women from 14 to 65 to build strength, confidence and a healthier, unstoppable tomorrow.
+            Empowering women of all ages to build strength, confidence and a healthier, unstoppable tomorrow.
           </p>
 
           {/* Social icons */}

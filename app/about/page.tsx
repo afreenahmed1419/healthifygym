@@ -4,7 +4,7 @@ import AboutClient from "../_components/AboutClient";
 export const metadata: Metadata = {
   title: "About Us | Women Only Fitness Club in Sri Vijaya Puram",
   description:
-    "Discover Healthify's story — a women only fitness club in Sri Vijaya Puram (Port Blair) built to help women aged 14 to 65 build strength, confidence and community.",
+    "Discover Healthify's story — a women only fitness club in Sri Vijaya Puram (Port Blair) built to help women of all ages build strength, confidence and community.",
   alternates: { canonical: "/about" },
   openGraph: {
     title: "About Healthify | Women Only Fitness Club in Sri Vijaya Puram",

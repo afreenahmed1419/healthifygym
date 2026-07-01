@@ -16,7 +16,7 @@ const FRAMES = Array.from({ length: 36 }, (_, i) => {
 const STAGES = [
   { id: "01", label: "FRONT VIEW", headline: "STRONGER", accent: "EVERY DAY.", sub: "Exclusive ladies fitness club.", body: "Built for every woman. Every goal. Every age.", showCtas: true },
   { id: "02", label: "RIGHT SIDE VIEW", headline: "EVERY REP", accent: "TELLS YOUR STORY.", sub: "Progress you can see. Strength you can feel.", body: "Expert coaches tracking every milestone of your journey.", showCtas: false },
-  { id: "03", label: "BACK VIEW", headline: "NEVER TOO LATE", accent: "TO BUILD YOURSELF.", sub: "14 to 65 — every age belongs here.", body: "It's never too late to rebuild, restart and reclaim yourself.", showCtas: false },
+  { id: "03", label: "BACK VIEW", headline: "NEVER TOO LATE", accent: "TO BUILD YOURSELF.", sub: "Every age belongs here.", body: "It's never too late to rebuild, restart and reclaim yourself.", showCtas: false },
   { id: "04", label: "LEFT SIDE VIEW", headline: "YOU ARE", accent: "NEVER ALONE.", sub: "A sisterhood that lifts you higher.", body: "2500+ women who sweat, struggle and celebrate together.", showCtas: false },
   { id: "05", label: "DYNAMIC ANGLE", headline: "DON'T WAIT.", accent: "JOIN NOW.", sub: "The strongest version of you starts here.", body: "Join Healthify. Transform your body. Own your power.", showCtas: true },
 ];

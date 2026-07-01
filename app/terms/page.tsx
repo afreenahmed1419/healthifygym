@@ -34,7 +34,7 @@ export default function TermsPage() {
 
           <Section title="Women-Only Policy">
             Healthify is a <strong style={{ color: "rgba(245,240,235,0.85)", fontWeight: 600 }}>100% women-only</strong> facility at all times.
-            Membership and access are open exclusively to women aged 14 to 65. By joining, you
+            Membership and access are open exclusively to women of all ages. By joining, you
             confirm that you meet this eligibility criterion. Healthify reserves the right to refuse
             or revoke membership if this policy is not met.
           </Section>

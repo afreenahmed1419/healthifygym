@@ -121,7 +121,7 @@ export default function HeroSectionMobile() {
           </div>
 
           <p style={{ fontFamily: "var(--font-body)", fontSize: "0.75rem", fontWeight: 300, color: "rgba(255,255,255,0.9)", lineHeight: 1.7, maxWidth: "240px", margin: "12px auto", textShadow: "0 1px 10px rgba(0,0,0,0.95)" }}>
-            Empowering women from 14 to 65 to build strength and confidence.
+            Empowering women of all ages to build strength and confidence.
           </p>
 
           <div style={{ pointerEvents: "auto" }}>

@@ -36,7 +36,7 @@ const barlow = Barlow({
 
 const SITE_URL = "https://www.healthifygym.in";
 const DEFAULT_DESCRIPTION =
-  "Healthify is a women-only fitness gym in Sri Vijaya Puram (Port Blair), Andaman & Nicobar Islands — strength training, group classes & coaching for ages 14 to 65.";
+  "Healthify is a women-only fitness gym in Sri Vijaya Puram (Port Blair), Andaman & Nicobar Islands — strength training, group classes & coaching for all ages.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
