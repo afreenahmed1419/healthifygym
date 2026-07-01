@@ -40,6 +40,7 @@ const DEFAULT_DESCRIPTION =
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  verification: { google: "GUqSZSwKBNMVz29hTYzNqf1CXTWsbYWpVdOWOsGTekI" },
   title: {
     template: "%s | Healthify Sri Vijaya Puram",
     default: "Healthify | Women's Fitness Gym in Sri Vijaya Puram (Port Blair)",
