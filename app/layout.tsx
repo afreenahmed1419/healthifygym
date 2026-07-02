@@ -93,7 +93,7 @@ export const metadata: Metadata = {
     shortcut: "/logo.png",
   },
   verification: {
-    google: "D8_DPKn2z-fwWbtQyrS10ycITt0u6QuTT5UHasPcEu8",
+    google: "GUqSZSwKBNMVz29hTYzNqf1CXTWsbYWpVdOWOsGTekI",
   },
 };
 
